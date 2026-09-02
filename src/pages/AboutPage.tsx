@@ -17,6 +17,7 @@ export function AboutPage() {
                 alt={person.name}
                 width={1024}
                 height={1024}
+                sizes="(max-width: 980px) min(512px, calc(100vw - 40px)), min(512px, 42vw)"
                 fetchPriority="high"
                 decoding="async"
               />
