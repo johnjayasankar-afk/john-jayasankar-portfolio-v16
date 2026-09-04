@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { CaseStudy } from "@/data/content";
 import { ProductVisual } from "@/artifacts/ProductVisual";
+import { ProductLink } from "@/components/ProductLink";
 import { VisibleMount } from "@/components/VisibleMount";
 import { kindForSlug } from "@/scene/kinds";
 
@@ -9,17 +10,28 @@ export function SystemStage({
   study,
   tone,
   flip = false,
+  eager = false,
   extra,
 }: {
   study: CaseStudy;
   tone: "chamber" | "sheet";
   flip?: boolean;
+  eager?: boolean;
   extra?: ReactNode;
 }) {
+  const live = study.productHref ? (
+    <ProductLink
+      className={tone === "chamber" ? "btn btn-solid" : "btn btn-ink"}
+      href={study.productHref}
+    >
+      {study.productLabel ?? "Open product"} ↗
+    </ProductLink>
+  ) : null;
+
   return (
     <section className={`sys-block ${tone}${flip ? " flip" : ""}`}>
       <div className="sys-visual">
-        <VisibleMount>
+        <VisibleMount eager={eager}>
           <ProductVisual kind={kindForSlug(study.slug)} />
         </VisibleMount>
         <span className="cal cal-tl" />
@@ -43,7 +55,7 @@ export function SystemStage({
           <Link className={tone === "chamber" ? "btn btn-ghost" : "btn btn-line"} to={`/work/${study.slug}`}>
             Open case
           </Link>
-          {extra}
+          {extra ?? live}
         </div>
       </div>
     </section>

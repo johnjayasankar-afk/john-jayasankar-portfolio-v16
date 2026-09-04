@@ -12,8 +12,8 @@ const CASE_SLUGS = [
   "fx-compression",
   "margin-simulator",
   "platform",
-  "agentfit",
-  "opportunity-os",
+  "ridelens",
+  "raildrop",
 ];
 
 const PATHS = [
@@ -22,47 +22,8 @@ const PATHS = [
   "/approach",
   "/writing",
   "/about",
-  "/agentfit",
-  "/opportunity-os",
-  "/apps/agentfit/",
-  "/apps/opportunity-os/",
   ...CASE_SLUGS.map((s) => `/work/${s}`),
 ];
-
-function nestedAppFallback(): Plugin {
-  const apps = [
-    { prefix: "/apps/agentfit", file: "/apps/agentfit/index.html" },
-    { prefix: "/apps/opportunity-os", file: "/apps/opportunity-os/index.html" },
-  ];
-
-  const handle = (req: { url?: string }, _res: unknown, next: () => void) => {
-    const url = (req.url ?? "").split("?")[0];
-    const match = apps.find(
-      (app) => url === app.prefix || url === `${app.prefix}/` || url.startsWith(`${app.prefix}/`),
-    );
-    if (!match) {
-      next();
-      return;
-    }
-    const rest = url.slice(match.prefix.length);
-    if (rest.includes(".") && !rest.endsWith(".html")) {
-      next();
-      return;
-    }
-    req.url = match.file;
-    next();
-  };
-
-  return {
-    name: "nested-app-fallback",
-    configureServer(server) {
-      server.middlewares.use(handle);
-    },
-    configurePreviewServer(server) {
-      server.middlewares.use(handle);
-    },
-  };
-}
 
 function siteMeta(origin: string): Plugin {
   const abs = (path: string) => `${origin}${path === "/" ? "/" : path}`;
@@ -97,7 +58,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     root: fileURLToPath(new URL(".", import.meta.url)),
-    plugins: [react(), nestedAppFallback(), siteMeta(origin)],
+    plugins: [react(), siteMeta(origin)],
     resolve: {
       alias: {
         "@": fileURLToPath(new URL("./src", import.meta.url)),

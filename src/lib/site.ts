@@ -11,8 +11,6 @@ export const routes = [
   "/approach",
   "/writing",
   "/about",
-  "/agentfit",
-  "/opportunity-os",
   ...cases.map((c) => `/work/${c.slug}`),
 ] as const;
 
@@ -34,6 +32,17 @@ export function absoluteUrl(path: string, origin = siteOrigin()) {
   return `${origin}${suffix === "/" ? "/" : suffix}`;
 }
 
+export function cleanPath(pathname: string) {
+  if (pathname === "/" || pathname === "") return "/";
+  return pathname.replace(/\/+$/, "");
+}
+
+export function isKnownPath(pathname: string) {
+  const path = cleanPath(pathname);
+  if (path === "/") return true;
+  return (routes as readonly string[]).includes(path);
+}
+
 export function pageTitle(pathname: string) {
   const titles: Record<string, string> = {
     "/": DEFAULT_TITLE,
@@ -41,33 +50,38 @@ export function pageTitle(pathname: string) {
     "/approach": "Build · John Jayasankar",
     "/writing": "Writing · John Jayasankar",
     "/about": "About · John Jayasankar",
-    "/agentfit": "AgentFit · John Jayasankar",
-    "/opportunity-os": "Opportunity OS · John Jayasankar",
+    "/ridelens": "RideLens · John Jayasankar",
+    "/raildrop": "RailDrop · John Jayasankar",
   };
-  const study = cases.find((c) => pathname === `/work/${c.slug}`);
-  return titles[pathname] ?? (study ? `${study.alias} · John Jayasankar` : DEFAULT_TITLE);
+  const path = cleanPath(pathname);
+  const study = cases.find((c) => path === `/work/${c.slug}`);
+  if (titles[path]) return titles[path];
+  if (study) return `${study.alias} · John Jayasankar`;
+  return "Not found · John Jayasankar";
 }
 
 export function pageDescription(pathname: string) {
-  const study = cases.find((c) => pathname === `/work/${c.slug}`);
+  const path = cleanPath(pathname);
+  const study = cases.find((c) => path === `/work/${c.slug}`);
   if (study) return study.summary;
-  if (pathname === "/about") {
+  if (path === "/about") {
     return "Lead Product Manager in New York. Production AI agents and 0→1 financial infrastructure.";
   }
-  if (pathname === "/work") {
+  if (path === "/work") {
     return "Selected systems: production AI agents and 0→1 financial infrastructure, with measured change.";
   }
-  if (pathname === "/approach") {
+  if (path === "/approach") {
     return "Agents should earn autonomy. Context, typed tools, human gates, and evidence.";
   }
-  if (pathname === "/writing") {
+  if (path === "/writing") {
     return "Product theses on agents, control, and financial infrastructure.";
   }
-  if (pathname === "/agentfit") {
-    return "When should a workflow get an agent? Fit score, autonomy ceiling, blockers, and a local-first instrument. A discovery hypothesis, not a production authorization.";
+  if (path === "/ridelens") {
+    return "Every ride, one comparison. Uber, Lyft, Empower, and Curb ranked before you book.";
   }
-  if (pathname === "/opportunity-os") {
-    return "A local-first command center for the search: Today, Pipeline, Contacts, Interviews, Story, and Fit. No backend. No accounts.";
+  if (path === "/raildrop") {
+    return "Know when your train gets cheaper. Watch Amtrak listed fares across your window — never invent a price.";
   }
-  return DEFAULT_DESCRIPTION;
+  if (path === "/") return DEFAULT_DESCRIPTION;
+  return "This page is not on johnjayasankar.com.";
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { storyBlend, useBus } from "./useBus";
 import { visual } from "@/scene/visual";
 import { Frame } from "./Frame";
+import { prefersReducedMotion } from "@/util/motion";
 
 const N = 8;
 const CX = 400;
@@ -36,11 +37,17 @@ export function CompressNet() {
   useBus();
   const [shown, setShown] = useState(visual.compress);
   useEffect(() => {
+    if (prefersReducedMotion()) {
+      visual.compress = visual.compressTarget;
+      setShown(visual.compressTarget);
+      return;
+    }
     let cur = visual.compress;
     let id = 0;
     const loop = () => {
       cur += (visual.compressTarget - cur) * 0.14;
       if (Math.abs(cur - visual.compressTarget) < 0.001) cur = visual.compressTarget;
+      visual.compress = cur;
       setShown((prev) => (Math.abs(prev - cur) < 0.0005 ? prev : cur));
       id = requestAnimationFrame(loop);
     };

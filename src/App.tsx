@@ -1,14 +1,24 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { lazy } from "react";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { Layout } from "@/components/Layout";
-import { HomePage } from "@/pages/HomePage";
-import { WorkPage } from "@/pages/WorkPage";
-import { CasePage } from "@/pages/CasePage";
-import { ApproachPage } from "@/pages/ApproachPage";
-import { WritingPage } from "@/pages/WritingPage";
-import { AboutPage } from "@/pages/AboutPage";
+import { NotFoundPage } from "@/pages/NotFoundPage";
 import { ProductLaunch } from "@/pages/ProductLaunch";
+import { liveProducts } from "@/data/content";
+import { cleanPath } from "@/lib/site";
+
+const HomePage = lazy(() => import("@/pages/HomePage").then((m) => ({ default: m.HomePage })));
+const WorkPage = lazy(() => import("@/pages/WorkPage").then((m) => ({ default: m.WorkPage })));
+const CasePage = lazy(() => import("@/pages/CasePage").then((m) => ({ default: m.CasePage })));
+const ApproachPage = lazy(() => import("@/pages/ApproachPage").then((m) => ({ default: m.ApproachPage })));
+const WritingPage = lazy(() => import("@/pages/WritingPage").then((m) => ({ default: m.WritingPage })));
+const AboutPage = lazy(() => import("@/pages/AboutPage").then((m) => ({ default: m.AboutPage })));
 
 export default function App() {
+  const { pathname, search, hash } = useLocation();
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return <Navigate to={`${cleanPath(pathname)}${search}${hash}`} replace />;
+  }
+
   return (
     <Routes>
       <Route element={<Layout />}>
@@ -18,16 +28,12 @@ export default function App() {
         <Route path="/approach" element={<ApproachPage />} />
         <Route path="/writing" element={<WritingPage />} />
         <Route path="/about" element={<AboutPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Route>
-      <Route
-        path="/agentfit"
-        element={<ProductLaunch href="/apps/agentfit/" label="AgentFit" />}
-      />
-      <Route
-        path="/opportunity-os"
-        element={<ProductLaunch href="/apps/opportunity-os/" label="Opportunity OS" />}
-      />
+      <Route path="/ridelens" element={<ProductLaunch href={liveProducts.ridelens} label="RideLens" />} />
+      <Route path="/raildrop" element={<ProductLaunch href={liveProducts.raildrop} label="RailDrop" />} />
+      <Route path="/agentfit" element={<ProductLaunch href={liveProducts.ridelens} label="RideLens" />} />
+      <Route path="/opportunity-os" element={<ProductLaunch href={liveProducts.raildrop} label="RailDrop" />} />
     </Routes>
   );
 }

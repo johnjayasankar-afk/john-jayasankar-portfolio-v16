@@ -9,14 +9,15 @@ export function AboutPage() {
       <section className="section about-section">
         <div className="wrap-wide about-grid">
           <Reveal className="about-intro">
-            <h1 className="sys">About</h1>
+            <p className="sys">About</p>
+            <h1 className="display">Lead Product Manager in New York.</h1>
             <figure className="portrait-plate">
               <img
                 className="portrait"
                 src={person.photo}
                 alt={person.name}
-                width={1024}
-                height={1024}
+                width={768}
+                height={768}
                 sizes="(max-width: 980px) min(512px, calc(100vw - 40px)), min(512px, 42vw)"
                 fetchPriority="high"
                 decoding="async"
@@ -44,7 +45,7 @@ export function AboutPage() {
                   Email me
                 </a>
                 <a className="btn btn-line" href={person.resume} target="_blank" rel="noreferrer">
-                  Résumé
+                  Résumé ↗
                 </a>
               </div>
             </div>

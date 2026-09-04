@@ -29,7 +29,7 @@ export function HomePage() {
               Selected systems
             </Link>
             <a className="btn btn-ghost" href={person.resume} target="_blank" rel="noreferrer">
-              Résumé
+              Résumé ↗
             </a>
           </div>
         </div>
@@ -57,36 +57,20 @@ export function HomePage() {
           <h2 className="display">Nine products. Measured change.</h2>
           <p className="lede">
             Production AI inside live operations. 0→1 infrastructure in rates, FX, and
-            cross-currency. Independent products for workflow fit and the search itself.
+            cross-currency. Then two independent products — rides and rail — built end-to-end
+            and shipped live.
           </p>
         </div>
       </section>
 
-      <SystemStage study={bySlug.iport} tone="chamber" />
+      <SystemStage study={bySlug.iport} tone="chamber" eager />
       <SystemStage study={bySlug.coco} tone="chamber" flip />
-      <SystemStage
-        study={bySlug.agentfit}
-        tone="sheet"
-        extra={
-          <Link className="btn btn-ink" to="/apps/agentfit/" reloadDocument>
-            Open AgentFit
-          </Link>
-        }
-      />
-      <SystemStage study={bySlug["cross-currency"]} tone="chamber" flip />
-      <SystemStage study={bySlug.valuation} tone="sheet" />
-      <SystemStage study={bySlug["fx-compression"]} tone="chamber" flip />
-      <SystemStage study={bySlug["margin-simulator"]} tone="sheet" />
-      <SystemStage
-        study={bySlug["opportunity-os"]}
-        tone="chamber"
-        flip
-        extra={
-          <Link className="btn btn-ghost" to="/apps/opportunity-os/" reloadDocument>
-            Open Opportunity OS
-          </Link>
-        }
-      />
+      <SystemStage study={bySlug["cross-currency"]} tone="sheet" />
+      <SystemStage study={bySlug.valuation} tone="chamber" flip />
+      <SystemStage study={bySlug["fx-compression"]} tone="sheet" />
+      <SystemStage study={bySlug["margin-simulator"]} tone="chamber" flip />
+      <SystemStage study={bySlug.ridelens} tone="sheet" />
+      <SystemStage study={bySlug.raildrop} tone="chamber" flip />
 
       <section className="sheet compact-ledger">
         <div className="wrap-wide ledger">
@@ -94,9 +78,7 @@ export function HomePage() {
             <span className="sys">JJ-SYS-{bySlug.platform.number}</span>
             <div>
               <h3>{bySlug.platform.title}</h3>
-              <p className="lede">
-                {bySlug.platform.summary}
-              </p>
+              <p className="lede">{bySlug.platform.summary}</p>
             </div>
             <span className="sys">
               {bySlug.platform.metrics.map((m) => m.value).join(" · ")}
@@ -143,23 +125,35 @@ export function HomePage() {
             <div className="section-head">
               <p className="sys">Writing</p>
               <h2 className="display">Product theses.</h2>
+              <p className="lede">
+                Short notes on AI product economics, autonomy, and infrastructure. Longer pieces land
+                on Substack.
+              </p>
             </div>
           </Reveal>
           <div className="writing-list">
             {writing.map((w, i) => (
-              <a key={w.title} href={person.substack} target="_blank" rel="noreferrer">
+              <article key={w.title}>
                 <span className="sys sys-num">{String(i + 1).padStart(2, "0")}</span>
                 <div>
                   <p className="sys">{w.tag}</p>
                   <h3>{w.title}</h3>
                   <p>{w.dek}</p>
                 </div>
-                <span className="sys" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
+              </article>
             ))}
           </div>
+          <p className="follow-link">
+            <Link className="text-link" to="/writing">
+              All theses →
+            </Link>
+            <span className="follow-sep" aria-hidden="true">
+              ·
+            </span>
+            <a className="text-link" href={person.substack} target="_blank" rel="noreferrer">
+              Notes in progress — follow on Substack ↗
+            </a>
+          </p>
         </div>
       </section>
 

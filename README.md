@@ -2,7 +2,12 @@
 
 Vite + React + TypeScript. Ready for GitHub and Vercel.
 
-The live products **AgentFit** and **Opportunity OS** ship inside this folder at `public/apps/` (copied into `dist/apps/` on build). They are the current working apps, not demos.
+Live independent products are linked out to their own Vercel deployments:
+
+- [RideLens](https://ride-lens2.vercel.app/) — every ride, one comparison
+- [RailDrop](https://rail-drop3.vercel.app/) — know when your train gets cheaper
+
+Case studies live on this site at `/work/ridelens` and `/work/raildrop`. Short paths `/ridelens` and `/raildrop` redirect to the live apps.
 
 ## Design system
 
@@ -16,18 +21,10 @@ The live products **AgentFit** and **Opportunity OS** ship inside this folder at
 ## Deploy on Vercel
 
 1. Unzip this folder. The unzipped folder is the repo root (`package.json` at the top level).
-2. Confirm `public/apps/agentfit/` and `public/apps/opportunity-os/` exist (the live products).
-3. Push it to a new GitHub repo.
-4. In [Vercel](https://vercel.com/new), import that repo.
-5. Leave the defaults: Framework **Vite**, build `npm run build`, output `dist`.
-6. Deploy. `vercel.json` rewrites the marketing site to `index.html` and the nested apps to their own `index.html`. Static assets under `/apps/*/assets/` are served as files.
-
-Live product URLs:
-
-- `/apps/agentfit/`
-- `/apps/opportunity-os/`
-
-`/agentfit` and `/opportunity-os` redirect to those apps.
+2. Push it to a new GitHub repo.
+3. In [Vercel](https://vercel.com/new), import that repo.
+4. Leave the defaults: Framework **Vite**, build `npm run build`, output `dist`.
+5. Deploy. `vercel.json` rewrites the marketing site to `index.html` and redirects product shortcuts to the live apps.
 
 ## Run locally
 
@@ -36,10 +33,4 @@ npm install
 npm run dev
 ```
 
-Opens at `http://localhost:5173` if that port is free. This repo’s Vite should be started from this folder with `--config ./vite.config.ts` so you do not accidentally serve the parent Opportunity OS app.
-
-If you rebuild the nested products from the sibling repos:
-
-```bash
-bash scripts/embed-products.sh
-```
+Opens at `http://localhost:5173` if that port is free. Start Vite from this folder with `--config ./vite.config.ts` so you do not accidentally serve a sibling app.

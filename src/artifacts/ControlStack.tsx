@@ -1,16 +1,18 @@
-import { useState } from "react";
+import { visual } from "@/scene/visual";
 import { Frame } from "./Frame";
+import { useBus } from "./useBus";
 
-const layers = [
-  { label: "Context", note: "MCP / domain APIs" },
-  { label: "Typed actions", note: "Pydantic bounds" },
-  { label: "Deterministic services", note: "high-consequence logic" },
-  { label: "HITL gates", note: "consequential steps" },
-  { label: "Eval / QA", note: "path to production" },
+export const CONTROL_LAYERS = [
+  { label: "Context", note: "MCP / domain APIs", short: "Context" },
+  { label: "Typed actions", note: "Pydantic bounds", short: "Actions" },
+  { label: "Deterministic services", note: "high-consequence logic", short: "Services" },
+  { label: "HITL gates", note: "consequential steps", short: "HITL" },
+  { label: "Eval / QA", note: "path to production", short: "Eval" },
 ];
 
 export function ControlStack() {
-  const [hot, setHot] = useState(2);
+  useBus();
+  const hot = visual.stack;
 
   return (
     <Frame viewBox="0 0 800 360">
@@ -27,15 +29,22 @@ export function ControlStack() {
         agent systems
       </text>
 
-      <line className="m-line" x1="48" y1="78" x2="48" y2="318" opacity="0.28" />
+      <line className="m-line" x1="48" y1="78" x2="48" y2="300" opacity="0.28" />
 
-      {layers.map((layer, i) => {
+      {CONTROL_LAYERS.map((layer, i) => {
         const w = 560 - i * 40;
         const x = (800 - w) / 2;
-        const y = 82 + i * 48;
+        const y = 78 + i * 44;
         const on = hot === i;
         return (
-          <g key={layer.label} style={{ cursor: "pointer" }} onClick={() => setHot(i)}>
+          <g
+            key={layer.label}
+            style={{ cursor: "pointer" }}
+            onClick={() => {
+              visual.stack = i;
+              visual.story = "rest";
+            }}
+          >
             <circle className={on ? "m-fill" : "m-box"} cx="48" cy={y + 16} r="4" opacity={on ? 0.95 : 0.4} />
             {on && <rect className="m-fill" x={x} y={y} width={w} height="32" opacity="0.1" />}
             <rect className="m-box" x={x} y={y} width={w} height="32" />
@@ -48,10 +57,6 @@ export function ControlStack() {
           </g>
         );
       })}
-
-      <text className="m-k" x="400" y="344" textAnchor="middle">
-        {String(hot + 1).padStart(2, "0")}  {layers[hot].label}  ·  {layers[hot].note}
-      </text>
     </Frame>
   );
 }

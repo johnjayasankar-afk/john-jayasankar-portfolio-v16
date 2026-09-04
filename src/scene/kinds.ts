@@ -8,8 +8,8 @@ export const kindBySlug: Record<string, ArtifactKind> = {
   "fx-compression": "fx-compression",
   platform: "platform",
   "margin-simulator": "margin-simulator",
-  agentfit: "agentfit",
-  "opportunity-os": "opportunity",
+  ridelens: "ridelens",
+  raildrop: "raildrop",
 };
 
 export function kindForSlug(slug: string): ArtifactKind {

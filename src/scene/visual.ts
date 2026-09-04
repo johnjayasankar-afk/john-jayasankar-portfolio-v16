@@ -4,46 +4,50 @@ export type ArtifactKind =
   | "systems-core"
   | "iport"
   | "coco"
-  | "agentfit"
+  | "ridelens"
   | "cross-currency"
   | "valuation"
   | "fx-compression"
   | "platform"
   | "margin-simulator"
   | "architecture"
-  | "opportunity";
+  | "raildrop";
 
 export type Story = "rest" | "broken" | "decision" | "control" | "impact";
 
 export type VisualState = {
-  fit: number;
+  ride: number;
   compress: number;
   compressTarget: number;
   hoverBank: number;
   hoverEnvelope: boolean;
+  envelopeLocked: boolean;
   capitalMode: "baseline" | "proposed" | "simulate" | "compare";
   iport: number;
   coco: number;
   reconcile: number;
   fx: number;
-  os: number;
+  rail: number;
   core: number;
+  stack: number;
   story: Story;
 };
 
 const defaults: VisualState = {
-  fit: 72,
+  ride: 0,
   compress: 0,
   compressTarget: 0,
   hoverBank: -1,
   hoverEnvelope: false,
+  envelopeLocked: false,
   capitalMode: "baseline",
   iport: 0,
   coco: 0,
   reconcile: 0,
   fx: 0,
-  os: 0,
+  rail: 0,
   core: 0,
+  stack: 2,
   story: "rest",
 };
 

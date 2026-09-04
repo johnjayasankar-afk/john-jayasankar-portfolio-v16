@@ -5,10 +5,12 @@ import { SiteFooter } from "@/components/Layout";
 import { ProductVisual } from "@/artifacts/ProductVisual";
 
 const ladder = [
-  { n: "01", t: "Assist", d: "Retrieve and summarize. Human executes." },
+  { n: "01", t: "Conventional", d: "Rules and scripts. No agent required." },
   { n: "02", t: "Copilot", d: "Recommend actions. Human decides." },
-  { n: "03", t: "Supervised", d: "Act with approval. Human remains the gate." },
-  { n: "04", t: "Bounded", d: "Act inside policy. Evals decide the next inch." },
+  { n: "03", t: "Assistive", d: "Retrieve and draft. Human executes." },
+  { n: "04", t: "Supervised", d: "Act with approval. Human remains the gate." },
+  { n: "05", t: "Bounded", d: "Act inside policy. Evals decide the next inch." },
+  { n: "06", t: "Autonomous", d: "Act within a proven envelope. Evidence first." },
 ];
 
 const layers = [

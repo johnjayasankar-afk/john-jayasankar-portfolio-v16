@@ -62,10 +62,10 @@ export function SystemsCore() {
   const hover = nearestBook(p.x, p.y);
   const pair = marketOn ? (hover >= 0 ? hover : 0) : hover;
   const status = marketOn
-    ? "Offsets hold  ·  risk stays in envelope"
+    ? "Offsets hold · risk in envelope"
     : gateOn
-      ? "HITL on the rail  ·  action stays typed"
-      : "Context authorized  ·  only what the run needs";
+      ? "HITL on the rail · typed action"
+      : "Context authorized · run-scoped";
 
   const setPhase = (value: number) => {
     visual.core = value;
@@ -183,7 +183,7 @@ export function SystemsCore() {
         </text>
       </g>
 
-      <text className="m-k" x="520" y="336">
+      <text className="m-k" x="772" y="336" textAnchor="end">
         {status}
       </text>
     </Frame>

@@ -21,7 +21,7 @@ export function CompanyLogo({ name }: { name: LogoName }) {
         <RasterMark src={wellsFargoMark} width={974} height={100} size={20} title="Wells Fargo" />
       )}
       {name === "wharton" && (
-        <RasterMark src={whartonMark} width={959} height={236} size={28} title="Wharton" />
+        <RasterMark src={whartonMark} width={341} height={84} size={28} title="Wharton" />
       )}
       {name === "hartford" && <HartfordMark />}
       {name === "oceantrail" && <OceanTrailMark />}

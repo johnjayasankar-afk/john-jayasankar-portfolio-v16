@@ -12,27 +12,24 @@ export function WritingPage() {
             <h1 className="display">Notes on agents, markets, and product economics.</h1>
             <p className="lede">
               Short theses on AI product economics, autonomy, and why the hardest AI products are
-              often infrastructure products.
+              often infrastructure products. Longer notes land on Substack.
             </p>
           </Reveal>
           <div className="writing-list">
             {writing.map((w, i) => (
-              <a key={w.title} href={person.substack} target="_blank" rel="noreferrer">
+              <article key={w.title}>
                 <span className="sys sys-num">{String(i + 1).padStart(2, "0")}</span>
                 <div>
                   <p className="sys">{w.tag}</p>
                   <h3>{w.title}</h3>
                   <p>{w.dek}</p>
                 </div>
-                <span className="sys" aria-hidden="true">
-                  ↗
-                </span>
-              </a>
+              </article>
             ))}
           </div>
           <p className="follow-link">
             <a className="text-link" href={person.substack} target="_blank" rel="noreferrer">
-              Follow on Substack ↗
+              Notes in progress — follow on Substack ↗
             </a>
           </p>
         </div>

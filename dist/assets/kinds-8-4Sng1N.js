@@ -1,0 +1,1 @@
+const o={iport:"iport",coco:"coco","cross-currency":"cross-currency",valuation:"valuation","fx-compression":"fx-compression",platform:"platform","margin-simulator":"margin-simulator",ridelens:"ridelens",raildrop:"raildrop"};function i(r){return o[r]??"systems-core"}export{i as k};

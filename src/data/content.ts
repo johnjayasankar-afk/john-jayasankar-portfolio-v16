@@ -48,6 +48,11 @@ export type CaseStudy = {
   productLabel?: string;
 };
 
+export const liveProducts = {
+  ridelens: "https://ride-lens2.vercel.app/",
+  raildrop: "https://rail-drop3.vercel.app/",
+} as const;
+
 export const cases: CaseStudy[] = [
   {
     slug: "iport",
@@ -323,87 +328,103 @@ export const cases: CaseStudy[] = [
     ],
   },
   {
-    slug: "agentfit",
+    slug: "ridelens",
     number: "08",
     kicker: "Independent product",
-    title: "AgentFit: when should a workflow get an agent?",
-    alias: "AgentFit",
+    title: "RideLens: every ride, one comparison",
+    alias: "RideLens",
     company: "Independent",
     year: "2026",
-    stage: "0→1 · working product",
-    productHref: "/apps/agentfit/",
-    productLabel: "Open AgentFit",
+    stage: "0→1 · live product",
+    productHref: liveProducts.ridelens,
+    productLabel: "Open RideLens",
     summary:
-      "Scores economics, reversibility, system access, and autonomy before anyone writes an orchestration graph. Fit and autonomy stay separate decisions.",
-    role: "Product and builder. Designed the scoring model, autonomy ceiling, blockers, portfolio classes, and the local-first instrument.",
+      "Live roads. Real rate cards. Uber, Lyft, Empower, and Curb in one place — ranked before you open four apps and guess.",
+    role: "Product and builder. Designed the comparison model, quote honesty rules, ranking modes, and the live marketplace surface.",
     problem:
-      "Teams jump from \"an LLM could help\" to \"we should build an agent.\" The missing product work is scoring opportunity, system access, reversibility, consequence, and whether the operating model actually changes — then refusing to collapse that into a single go/no-go.",
+      "Getting across town meant bouncing between apps, comparing stale screenshots in my head, and hoping the fare I saw was still the fare I would pay. Ranges got flattened into fake precision. Wait times lived in a different mental tab than price.",
     decision:
-      "A local-first instrument. Agent Fit is opportunity. Autonomy is a separate control decision with a conservative ceiling. Blockers, readiness, scenario, and sensitivity sit beside the score. It supports discovery. It does not authorize production.",
+      "Build one decision surface. Map the route once. Pull published rate cards and a marketplace that moves with time of day, weather, and hotspots. Keep estimates as estimates, ranges as ranges, and upfront quotes as upfront. Rank by Price, Soonest, or Value — then hand off to the provider to book.",
     outcome:
-      "A working product on this site: assessments, library, compare, matrix, decision brief, and pilot design. IndexedDB. No account. No model API. It will recommend conventional software when that is the honest answer.",
+      "A working product: Photon search, OSRM routing, side-by-side provider cards, and auto-refresh after the first compare. Built end-to-end in Cursor and shipped live. I made it because I kept paying the tax of not knowing which ride was actually better tonight.",
     metrics: [
-      { value: "0–100", label: "agent fit, not autonomy" },
-      { value: "6 rungs", label: "conventional → autonomous" },
-      { value: "Local-first", label: "no backend, no keys" },
+      { value: "4", label: "providers, one board" },
+      { value: "Live", label: "route + marketplace" },
+      { value: "Honest", label: "ranges stay ranges" },
     ],
-    chips: ["Fit ≠ autonomy", "Blockers", "Portfolio class", "Scenario + sensitivity"],
+    chips: ["Multi-provider", "Live routing", "Quote honesty", "Price · Soonest · Value"],
     flow: [
-      { stage: "Define", title: "Workflow and economics", note: "Volume, time, structure, systems, risk, human loop." },
-      { stage: "Separate", title: "Fit score, then a ceiling", note: "High fit can still be supervised. Blockers cap independence." },
-      { stage: "Decide", title: "Verdict and next experiment", note: "Brief, pilot design, success criteria — not a go-live." },
+      { stage: "Fragmented", title: "Four apps, one guess", note: "Price in one place. ETA in another. Memory in between." },
+      { stage: "One surface", title: "Route once, compare once", note: "Same trip. Side-by-side cards. Rank modes you can trust." },
+      { stage: "Decide", title: "Pick, then book there", note: "RideLens ranks. The provider still owns the ride." },
     ],
     blocks: [
       {
-        title: "Product logic",
+        title: "Why I built it",
         body: [
-          "Score economic opportunity, structure, technical readiness, controllability, risk, and judgment separately from autonomy",
-          "Cap independence when consequence, access, verification, or policy cannot support it",
-          "Classify the portfolio: Build Now, De-risk First, Assist Don't Agentify, Automate Conventionally, Low Priority",
-          "Treat capacity as potential time returned, and the output as a discovery hypothesis",
+          "I live in a city where the right ride changes with the clock — and where opening four apps is its own chore",
+          "I wanted a product that respects uncertainty: never invent a midpoint just to look decisive",
+          "The interesting work was the comparison contract, not another map widget",
+        ],
+      },
+      {
+        title: "How it works",
+        body: [
+          "Search From and To (or Quick fill), map the route, and line up Uber, Lyft, Empower, and Curb",
+          "Fare math uses published rate cards plus a marketplace model that ticks with conditions",
+          "Rank by Price, Soonest, or Value; expired quotes never win the board",
+          "Open the provider to book — RideLens stays the lens, not the broker",
         ],
       },
     ],
   },
   {
-    slug: "opportunity-os",
+    slug: "raildrop",
     number: "09",
     kicker: "Independent product",
-    title: "Opportunity OS: a local command center for the search",
-    alias: "Opportunity OS",
+    title: "RailDrop: know when your train gets cheaper",
+    alias: "RailDrop",
     company: "Independent",
     year: "2026",
-    stage: "0→1 · working product",
-    productHref: "/apps/opportunity-os/",
-    productLabel: "Open Opportunity OS",
+    stage: "0→1 · live product",
+    productHref: liveProducts.raildrop,
+    productLabel: "Open RailDrop",
     summary:
-      "One local workspace for Today, Pipeline, Contacts, Interviews, Story, and Fit — replacing spreadsheets, Notion pages, and scattered reminders. No backend. No accounts. No API keys.",
-    role: "Product and builder. Designed the operating model, the surfaces, and the local Fit Engine.",
+      "Book the trip. Watch every bookable Amtrak rail option across your window. One email when a listed fare actually drops — never an invented price.",
+    role: "Product and builder. Designed the watch window, honesty rules, alert discipline, and the live board that never pretends Amtrak is quieter than it is.",
     problem:
-      "A serious search lives in too many tools. Next actions, pipeline state, interview prep, and career stories drift apart. Fit is guessed. Momentum is reconstructed from memory.",
+      "Northeast Corridor trips are booked early for peace of mind, then the board keeps moving. Flexible tickets can be changed — but only if you notice the drop. Most people do not. They paid $128 and never learn Regional 95 is sitting at $47.",
     decision:
-      "Build a local-first command center. IndexedDB holds the workspace. Today surfaces the next action. Pipeline holds the board. Contacts and interviews stay attached. Story Bank keeps STAR evidence. A transparent Fit Engine scores 0–100 from a Master Profile without calling a model.",
+      "Watch the corridor, not just the train you bought. Default window is travel day ±1. Compare against what you actually paid. Surface every eligible rail option. Alert once when the opportunity improves. Keep booking on Amtrak — copy the itinerary, confirm there, never invent a deep link or a fare.",
     outcome:
-      "A working v3 product: keyboard-first, local IndexedDB, confirmations, and a backup you can inspect. The search becomes a system you can run without sending data anywhere.",
+      "A live product with immediate scans, scheduled rechecks, guest watches, optional email alerts, and a board that fails honestly when the source is down. Built end-to-end in Cursor. I made it after enough trips where the cheaper train was there the whole time — I just was not watching.",
     metrics: [
-      { value: "Local-first", label: "no backend, no keys" },
-      { value: "0–100", label: "transparent fit" },
-      { value: "Today", label: "next action visible" },
+      { value: "±1 day", label: "default watch window" },
+      { value: "Honest", label: "never invent a fare" },
+      { value: "One alert", label: "only when it improves" },
     ],
-    chips: ["Local-first", "Fit engine", "Pipeline + Story", "Keyboard-first"],
+    chips: ["Fare watch", "±1 day board", "No invented prices", "You decide on Amtrak"],
     flow: [
-      { stage: "Scattered", title: "Tools instead of a system", note: "Spreadsheet, Notion, bookmarks, reminders." },
-      { stage: "Center", title: "One local workspace", note: "Today, Pipeline, Contacts, Interviews, Story." },
-      { stage: "Signal", title: "Fit without a model", note: "0–100 from the Master Profile, inspectable." },
+      { stage: "Booked", title: "You already paid", note: "Peace of mind first. The board does not freeze for you." },
+      { stage: "Watch", title: "Same stations, every train", note: "Regional, Acela, connections — not just your seat." },
+      { stage: "Alert", title: "One precise email", note: "Opportunity improved. Confirm on Amtrak before you change anything." },
     ],
     blocks: [
       {
-        title: "Product surface",
+        title: "Why I built it",
         body: [
-          "Today focuses the next action, deadlines, and momentum",
-          "Pipeline, contacts, and interviews stay on one board",
-          "Story Bank keeps STAR evidence tagged to interviews",
-          "Local Fit Engine scores 0–100 from the Master Profile, with no model call",
+          "I kept buying Flexible Amtrak tickets early, then learning too late that a later Regional was half the price",
+          "Existing tools either invent certainty or bury the signal in noise — I wanted quiet honesty",
+          "The product is the watch discipline: same stations, every rail option, alert only when it matters",
+        ],
+      },
+      {
+        title: "How it works",
+        body: [
+          "Tell RailDrop stations, date, and what you paid — the first scan runs immediately",
+          "Default window covers the day before, the travel day, and the day after",
+          "Email only when a qualifying fare appears or the best listed price improves",
+          "Copy trip details and change on Amtrak; RailDrop never invents fees, fares, or fake itineraries",
         ],
       },
     ],
