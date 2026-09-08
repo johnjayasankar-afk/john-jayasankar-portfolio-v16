@@ -1,0 +1,13 @@
+node_modules
+dist
+.DS_Store
+*.local
+.vercel
+.env
+.env.*
+research
+
+*.zip
+john-jayasankar-website-production.zip
+
+.audit/
