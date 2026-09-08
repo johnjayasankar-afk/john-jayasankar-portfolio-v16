@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://johnjayasankar.com/sitemap.xml

@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#09080c" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="John Jayasankar" />
+    <title>John Jayasankar · Lead Product Manager</title>
+    <meta
+      name="description"
+      content="John Jayasankar is a Lead Product Manager in New York building production AI agents and 0→1 financial infrastructure. AI agents, fintech, and high-stakes workflows."
+    />
+    <meta
+      name="keywords"
+      content="John Jayasankar, Lead Product Manager, AI agents, fintech, financial infrastructure, 0→1 product, New York"
+    />
+    <link rel="canonical" href="https://johnjayasankar.com/" />
+    <meta property="og:site_name" content="John Jayasankar" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:title" content="John Jayasankar · Lead Product Manager" />
+    <meta
+      property="og:description"
+      content="Production AI agents and 0→1 financial infrastructure for high-stakes workflows."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://johnjayasankar.com/" />
+    <meta property="og:image" content="https://johnjayasankar.com/john-jayasankar.jpg" />
+    <meta property="og:image:alt" content="Portrait of John Jayasankar" />
+    <meta property="og:image:width" content="768" />
+    <meta property="og:image:height" content="768" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="John Jayasankar · Lead Product Manager" />
+    <meta
+      name="twitter:description"
+      content="Production AI agents and 0→1 financial infrastructure for high-stakes workflows."
+    />
+    <meta name="twitter:image" content="https://johnjayasankar.com/john-jayasankar.jpg" />
+    <meta name="twitter:image:alt" content="Portrait of John Jayasankar" />
+    <script>
+      (function () {
+        var origin = location.origin;
+        var path = (location.pathname || "/").replace(/\/+$/, "") || "/";
+        var url = origin + (path === "/" ? "/" : path);
+        var image = origin + "/john-jayasankar.jpg";
+        var pages = {
+          "/": {
+            title: "John Jayasankar · Lead Product Manager",
+            description:
+              "John Jayasankar is a Lead Product Manager in New York building production AI agents and 0→1 financial infrastructure. AI agents, fintech, and high-stakes workflows.",
+          },
+          "/work": {
+            title: "Work · John Jayasankar",
+            description:
+              "Selected systems: production AI agents and 0→1 financial infrastructure, with measured change.",
+          },
+          "/approach": {
+            title: "Build · John Jayasankar",
+            description: "Agents should earn autonomy. Context, typed tools, human gates, and evidence.",
+          },
+          "/writing": {
+            title: "Writing · John Jayasankar",
+            description: "Product theses on agents, control, and financial infrastructure.",
+          },
+          "/about": {
+            title: "About · John Jayasankar",
+            description:
+              "Lead Product Manager in New York. Production AI agents and 0→1 financial infrastructure.",
+          },
+          "/simple": {
+            title: "John Jayasankar",
+            description:
+              "John Jayasankar. Lead Product Manager in New York. Production AI agents, financial infrastructure, RideLens, RailDrop, and Daylight.",
+          },
+          "/work/iport": {
+            title: "I-Port · John Jayasankar",
+            description:
+              "A production AI agent sitting inside a live operations workflow, not beside it. Bounded actions, operator visibility, and a quality bar the system had to hold.",
+          },
+          "/work/coco": {
+            title: "QT CoCo · John Jayasankar",
+            description:
+              "Years of production knowledge, two domain MCP servers, and a product that diagnoses before it escalates.",
+          },
+          "/work/cross-currency": {
+            title: "LCH SwapAgent · John Jayasankar",
+            description:
+              "A settlement path that turned unused network offsets into an executable multilateral product.",
+          },
+          "/work/valuation": {
+            title: "Simplified Compression · John Jayasankar",
+            description:
+              "An independent valuation view plus dual-source validation. Data quality became a product control, not an operations cleanup step.",
+          },
+          "/work/fx-compression": {
+            title: "ForexClear · John Jayasankar",
+            description:
+              "A mathematically good proposal still fails if margin inputs disagree. Reliability had to live inside the product.",
+          },
+          "/work/platform": {
+            title: "AI Platform & Controls · John Jayasankar",
+            description:
+              "One-off agent integrations do not scale. The scarce work was making context, tools, actions, and evaluation consistent.",
+          },
+          "/work/margin-simulator": {
+            title: "OpenGamma What-If · John Jayasankar",
+            description:
+              "Trading teams could see current margin. They could not see what a proposed trade would do to capital across broker, venue, and product, before they executed it.",
+          },
+          "/work/ridelens": {
+            title: "RideLens · John Jayasankar",
+            description:
+              "Live roads. Real rate cards. Uber, Lyft, Empower, and Curb in one place, ranked before you open four apps and guess.",
+          },
+          "/work/raildrop": {
+            title: "RailDrop · John Jayasankar",
+            description:
+              "Book the trip. Watch every bookable Amtrak rail option across your window. One email when a listed fare actually drops. Never an invented price.",
+          },
+          "/work/daylight": {
+            title: "Daylight · John Jayasankar",
+            description:
+              "Adaptive display lighting for macOS. Warmth and brightness on a schedule you set — gradual, offline, and explainable about what it is doing and why.",
+          },
+        };
+        var page = pages[path];
+        var pairs = [
+          ['meta[property="og:url"]', "content", url],
+          ['meta[property="og:image"]', "content", image],
+          ['meta[name="twitter:image"]', "content", image],
+          ['link[rel="canonical"]', "href", url],
+        ];
+        if (page) {
+          document.title = page.title;
+          pairs.push(
+            ['meta[name="description"]', "content", page.description],
+            ['meta[property="og:title"]', "content", page.title],
+            ['meta[property="og:description"]', "content", page.description],
+            ['meta[name="twitter:title"]', "content", page.title],
+            ['meta[name="twitter:description"]', "content", page.description],
+          );
+        } else if (path !== "/") {
+          document.title = "Not found · John Jayasankar";
+          pairs.push(
+            ['meta[name="robots"]', "content", "noindex, follow"],
+            ['meta[name="description"]', "content", "This page is not on johnjayasankar.com."],
+            ['meta[property="og:title"]', "content", "Not found · John Jayasankar"],
+            ['meta[property="og:description"]', "content", "This page is not on johnjayasankar.com."],
+            ['meta[name="twitter:title"]', "content", "Not found · John Jayasankar"],
+            ['meta[name="twitter:description"]', "content", "This page is not on johnjayasankar.com."],
+          );
+        }
+        for (var i = 0; i < pairs.length; i++) {
+          var el = document.querySelector(pairs[i][0]);
+          if (el) el.setAttribute(pairs[i][1], pairs[i][2]);
+        }
+
+        if (path === "/simple") {
+          document.documentElement.classList.add("simple-mode");
+          var theme = document.querySelector('meta[name="theme-color"]');
+          if (theme) theme.setAttribute("content", "#ffffff");
+          if (!document.querySelector('link[rel="preload"][as="image"][href="/john-jayasankar.jpg"]')) {
+            var imgPreload = document.createElement("link");
+            imgPreload.rel = "preload";
+            imgPreload.as = "image";
+            imgPreload.href = "/john-jayasankar.jpg";
+            document.head.appendChild(imgPreload);
+          }
+        } else {
+          var fonts = [
+            "/fonts/schibsted-grotesk-latin-400.woff2",
+            "/fonts/schibsted-grotesk-latin-500.woff2",
+            "/fonts/ibm-plex-mono-latin-400.woff2",
+            "/fonts/ibm-plex-mono-latin-500.woff2",
+          ];
+          for (var f = 0; f < fonts.length; f++) {
+            var fontLink = document.createElement("link");
+            fontLink.rel = "preload";
+            fontLink.as = "font";
+            fontLink.type = "font/woff2";
+            fontLink.href = fonts[f];
+            fontLink.crossOrigin = "anonymous";
+            document.head.appendChild(fontLink);
+          }
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/assets/index-B9XemWHj.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-DrC9U47_.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
