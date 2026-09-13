@@ -3,7 +3,7 @@
 07 is verbatim from johnjayasankar.com.
 
 08-10 are John's independent products, the three featured on his Labs site
-(labs-rouge.vercel.app). Their cases keep the live site's wording and extend it
+(labs.johnjayasankar.com). Their cases keep the live site's wording and extend it
 with facts stated on each product's own public site, captured September 2026:
 ride-lens2.vercel.app, rail-drop3.vercel.app and daylight-app-wine.vercel.app.
 Nothing is inferred from code or invented. Figures shown in the stories are the

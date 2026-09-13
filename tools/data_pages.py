@@ -3,7 +3,7 @@ simple, 404.
 
 Copy is taken from johnjayasankar.com (captured September 2026) so every claim,
 number and link on the rebuilt site matches the live one. The Labs page and the
-home Labs section use the wording of John's Labs site (labs-rouge.vercel.app)
+home Labs section use the wording of John's Labs site (labs.johnjayasankar.com)
 for RideLens, Daylight, and RailDrop.
 
 Fields named *_html are small trusted fragments authored here: links, <kbd> and
@@ -18,7 +18,7 @@ SITE = dict(
     email='johnjayasankar@gmail.com',
     linkedin='https://www.linkedin.com/in/johnjayasankar',
     substack='https://substack.com/@johnjayasankar',
-    labs='https://labs-rouge.vercel.app/',
+    labs='https://labs.johnjayasankar.com/',
     resume='/John_Jayasankar_Resume.pdf',
     og_image='/assets/img/og.jpg',
     og_alt='John Jayasankar · Lead Product Manager · production AI agents and 0→1 financial infrastructure',
@@ -43,7 +43,7 @@ ELSEWHERE = [
     ('LinkedIn', 'https://www.linkedin.com/in/johnjayasankar', True),
     ('Résumé', '/John_Jayasankar_Resume.pdf', True),
     ('Substack', 'https://substack.com/@johnjayasankar', True),
-    ('Labs', 'https://labs-rouge.vercel.app/', True),
+    ('Labs', 'https://labs.johnjayasankar.com/', True),
 ]
 
 # The Work menu in the header, and the footer, group every case this way.
@@ -164,7 +164,7 @@ HOME = dict(
         n='03', kicker='Labs',
         h2=('Instruments I shipped.', 'Three independent products, built end-to-end.'),
         lede='Consumer tools and a native macOS app, each designed, built, and shipped live. No demos.',
-        link=('Visit Labs', 'https://labs-rouge.vercel.app/'), more=('The Labs page', '/labs')),
+        link=('Visit Labs', 'https://labs.johnjayasankar.com/'), more=('The Labs page', '/labs')),
     approach=dict(
         n='04', kicker='Approach',
         h2=('Agents should earn autonomy.', 'Model capability is only one layer.'),
@@ -192,7 +192,7 @@ LABS = dict(
         lede='Each draws a hard line between what it knows and what it would be tempting to guess.'),
     cta=dict(h2='Every build lives on Labs.',
              lede='The Labs site keeps the whole bench in one place, each product one click from live.',
-             link=('Visit Labs', 'https://labs-rouge.vercel.app/')),
+             link=('Visit Labs', 'https://labs.johnjayasankar.com/')),
     hint='j / k products · Enter opens the case · 1-4 phases · ⌘K jump',
 )
 
@@ -317,7 +317,7 @@ SIMPLE = dict(
         dict(span='2018 - 2022', logo='haverford', alt='Haverford College',
              html=['B.A. in Economics &amp; Linguistics at <a href="https://www.haverford.edu/">Haverford College</a>. GPA 3.9, cum laude, Linguistics High Honors. I liked the combination: models of behavior on one side, precision about language and meaning on the other. That pairing still shows up in how I design agent boundaries.']),
     ],
-    bio_html='John Jayasankar is a Lead Product Manager in New York. He builds production AI agents and 0→1 financial infrastructure for complex, high-stakes workflows. At Quantile (LSEG) he has shipped agents and optimization products used by global banks. Previously he originated a pre-trade margin simulator at OpenGamma. Independently he built and shipped <a href="https://ride-lens2.vercel.app/">RideLens</a>, <a href="https://rail-drop3.vercel.app/">RailDrop</a>, and <a href="https://daylight-app-wine.vercel.app/">Daylight</a>, collected on <a href="https://labs-rouge.vercel.app/">Labs</a>.',
+    bio_html='John Jayasankar is a Lead Product Manager in New York. He builds production AI agents and 0→1 financial infrastructure for complex, high-stakes workflows. At Quantile (LSEG) he has shipped agents and optimization products used by global banks. Previously he originated a pre-trade margin simulator at OpenGamma. Independently he built and shipped <a href="https://ride-lens2.vercel.app/">RideLens</a>, <a href="https://rail-drop3.vercel.app/">RailDrop</a>, and <a href="https://daylight-app-wine.vercel.app/">Daylight</a>, collected on <a href="https://labs.johnjayasankar.com/">Labs</a>.',
     systems=[('iport', 'I-Port', '3.5h setup → 8 minutes'),
              ('coco', 'QT CoCo', '750+ eng hours returned / year'),
              ('cross-currency', 'SwapAgent', '$6.5T notional made eligible'),
@@ -330,7 +330,7 @@ SIMPLE = dict(
              ('raildrop', 'RailDrop', 'Know when your train gets cheaper')],
     build_html='Agents should earn autonomy. I start with the workflow, then give the system only the context, tools, and typed actions it needs, with a human gate on anything consequential. Model capability is one layer. Scope expands when evidence says it should. <a href="/approach">More on the control model here</a>.',
     writing_html='Short theses for now. Longer notes land on <a href="https://substack.com/@johnjayasankar">Substack</a>.',
-    pets_intro_html='My three best independent builds, all shipped live and collected on <a href="https://labs-rouge.vercel.app/">Labs</a>.',
+    pets_intro_html='My three best independent builds, all shipped live and collected on <a href="https://labs.johnjayasankar.com/">Labs</a>.',
     pets=[
         dict(slug='ridelens', html='<a href="https://ride-lens2.vercel.app/">RideLens</a> is every ride, one comparison. Live roads. Real rate cards. Uber, Lyft, Empower, and Curb ranked before you book. I built it end-to-end because I was tired of opening four apps and guessing. <a href="/work/ridelens">Case writeup</a>.'),
         dict(slug='daylight', html='<a href="https://daylight-app-wine.vercel.app/">Daylight</a> is adaptive display lighting for macOS: warmth and brightness on a schedule you set, entirely offline, with a printed six-layer precedence ladder and three levels of certainty about whether a change actually took. <a href="/work/daylight">Case writeup</a>.'),
@@ -344,7 +344,7 @@ SIMPLE = dict(
               ('margin-simulator', 'OpenGamma · 2022 - 2023', '0→1 front-office product · adoption across 20+ enterprise clients')],
     misc_html=[
         'The denser version of this site, with interactive systems diagrams, lives on the <a href="/">full site</a> (or press <kbd>F</kbd>).',
-        'Independent products live on <a href="https://labs-rouge.vercel.app/">Labs</a>, and on the <a href="/labs">Labs page</a> of the full site.',
+        'Independent products live on <a href="https://labs.johnjayasankar.com/">Labs</a>, and on the <a href="/labs">Labs page</a> of the full site.',
         'I write short notes on agent economics and control on <a href="https://substack.com/@johnjayasankar">Substack</a>.',
         'Based in New York. Best email is under the envelope icon above (press <kbd>E</kbd>, <kbd>Esc</kbd> to hide), or just <a href="mailto:johnjayasankar@gmail.com">johnjayasankar@gmail.com</a>.',
         'Résumé as a PDF: <a href="/John_Jayasankar_Resume.pdf">John_Jayasankar_Resume.pdf</a>.',
