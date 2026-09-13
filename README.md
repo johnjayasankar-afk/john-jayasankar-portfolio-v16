@@ -20,7 +20,12 @@ build step.
 4. Deploy. Every push to the default branch redeploys.
 
 `vercel.json` supplies clean URLs (`/work/iport` serves `work/iport.html`),
-caching and security headers, including the Content-Security-Policy.
+caching and security headers, including the Content-Security-Policy. It also
+pins the build settings: framework preset Other, no install step, no build step,
+and the repository root as the output directory. Those override the project's
+dashboard settings, so a Vercel project that was first set up for another
+framework (for example Vite, which fails with `vite: command not found`) still
+serves this site as plain files.
 `.vercelignore` keeps the generator, the story lab pages, the research notes and
 these docs off the CDN.
 
