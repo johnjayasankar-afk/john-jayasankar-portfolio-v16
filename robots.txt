@@ -1,5 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /research/
-
-Sitemap: https://johnjayasankar.com/sitemap.xml
