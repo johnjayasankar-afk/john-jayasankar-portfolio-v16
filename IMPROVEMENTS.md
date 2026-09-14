@@ -5,6 +5,86 @@ was actually verified, what is still open, and where the next cycle should look.
 
 ---
 
+## Cycle 15 - 2026-09-14 · Gridiron joins Labs
+
+**Why this.** John asked for Gridiron, his live football command center, to be
+featured on the portfolio and on Labs, with a story, a graphic and a case study
+that match the other Labs products.
+
+### Shipped
+
+**1. A story for Gridiron (`tools/stories.py`, shared with Labs).** Four phases,
+and every figure is one Gridiron shows while replaying its captured NFL Week 1
+games:
+- *Slate*: six games live at once, Watch next naming why ARI at LAC deserves
+  attention, and a pointer opening it.
+- *Drive*: ARI's opening drive drawn only between reported spots, on a deep
+  forest field in light perspective, passes arcing and runs sweeping, until the
+  ball sits at the LAC 5 with the red zone tinted, the line of scrimmage in blue
+  and the goal line in amber as the line to gain.
+- *Odds*: ESPN win probability LAC 70%, DraftKings' closing lines and Kalshi at
+  73.5¢, each named, beside "Gridiron never calculates a chance".
+- *Touchdown*: the 5-yard run draws into the end zone, the end zone lights, the
+  score counts to 7, the meter moves to LAC 65% and ESPN's +5 swing counts up.
+The score bug is text over the field, as in the product. Smaller frames drop the
+field note, the situation line and the fourth slate row.
+
+**2. The case (`/work/gridiron`, JJ-SYS-11).** Fifteen beats taken from
+Gridiron's own README and changelog at 0.5.1: the "Reported, never guessed"
+contract, reading the field, odds and win probability, how it stays live, what it
+does not claim, and how it was built, which is John's brief implemented with
+Claude Code. Gridiron sends `frame-ancestors 'none'`, so the case links to it
+rather than framing it, as Daylight's does.
+
+**3. Everywhere Labs is listed.** The home Labs band (four products in two pairs;
+on wide screens each card lays its story beside its words), the Labs page (four
+index cards, a featured row, four rules across), Work, the Work menu, the footer,
+About, Simple (a system card and a pet project), the palette and the sitemap. The
+home lede, Labs headings and descriptions now name four products.
+`assets/img/work/gridiron.jpg` was rendered from `_thumbs` like the others.
+
+**4. Labs (labs.johnjayasankar.com).** Gridiron is featured as build 04, with a
+`/gridiron` short link, and AgentFit, Cartonry, KeepFloor and Pricing Hub move to
+05 to 08. The hero showcase gains a fourth tab, named without its number on
+narrow phones. Eight rules sit in two rows of four, the 404 index lists eight
+builds, the Builds menu counts come from the data, and the link-preview card was
+captured again.
+
+**5. `.vercelignore` in both sites.** Both READMEs describe it, but neither
+repository had one, so the generator, the story lab and, here, the research notes
+were being served from the live domains.
+
+### Verified
+
+- Both builds clean: no dashes, no dead links, anchors or ARIA references, no
+  duplicate ids, one story step per phase.
+- Every Gridiron phase in the story lab, from the 846px case bay to the 248px
+  phone card: nothing spills past its stage and no label is cut.
+- Real pages at 1440, 1280, 768, 390 and 320: the home Labs band, the Labs page,
+  the case, Work and Simple here; the Labs home, its featured row, Also shipped,
+  the rules and the 404 there. No console errors beyond the 404 page's own 404.
+- Motion, sampled in time: the drive draws hop by hop and the ball and lines
+  arrive after it; the touchdown draws, lights and counts; the pointer presses
+  Open on the slate. With reduced motion every phase is complete and still.
+- Every figure in the story traced to Gridiron's fixtures or its own capture: see
+  the fourth pass in `research/product-visual-source-ledger.md`.
+
+### Not verified
+
+- Safari, Firefox and a physical device.
+- The Gridiron deployment beyond 14 September, when it answered at 0.5.1 with
+  game pages loading.
+
+### Where the next cycle should look
+
+1. **"How it was built"** says Gridiron was implemented with Claude Code from
+   John's brief. It is accurate; John should confirm the wording is how he wants
+   it said.
+2. The home showcase's Labs tab still opens RideLens. Gridiron could take it if
+   John wants his newest product in the hero.
+
+---
+
 ## Cycle 14 - 2026-09-13 · Final pass: covers, principles, story detail
 
 **Why this.** John asked for one final pass over every project animation, and for

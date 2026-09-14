@@ -55,7 +55,7 @@ Everything a visitor reads lives in four files:
 | File | Holds |
 |---|---|
 | `tools/data_systems_a.py` | JJ-SYS-01 to 06: the Quantile systems. Case copy, metrics, bay titles and phases |
-| `tools/data_systems_b.py` | JJ-SYS-07 OpenGamma, then 08 to 10: RideLens, RailDrop and Daylight, including their Labs card copy |
+| `tools/data_systems_b.py` | JJ-SYS-07 OpenGamma, then 08 to 11: RideLens, RailDrop, Daylight and Gridiron, including their Labs card copy |
 | `tools/data_pages.py` | home, labs, work, approach, about, writing, simple and 404 copy, including the home before and after rows; navigation, the Work menu groups and footer links; investor marks; the domain |
 | `tools/stories.py` | each system's story: what its schematic interface shows at every phase |
 | `tools/ideas.py` | the writing covers and the Approach principle drawings, in the same language |
@@ -83,7 +83,7 @@ note, printed below it.
 
 ```
 index.html  labs.html  work.html  approach.html  about.html  writing.html  simple.html  404.html
-work/<system>.html            one case page per system (10)
+work/<system>.html            one case page per system (11)
 assets/css/site.css           design tokens, every component and the stories
 assets/css/simple.css         the plain page
 assets/js/site.js             header and Work menu, reveal and count-up, showcase tabs,
@@ -129,7 +129,8 @@ Notes and metrics float beside the window where there is room for them.
 - Stories are schematic and every bay footer says so. Figures are the case's
   own. RailDrop's board is the sample board on RailDrop's own site, and Daylight
   uses its Balanced preset and six layers. RideLens ranks quote types rather
-  than providers, because nothing published says which provider wins.
+  than providers, because nothing published says which provider wins. Gridiron
+  shows captured real games from its NFL Week 1 replay, as the app shows them.
 
 In `tools/stories.py`, an element that belongs to some phases carries `data-on`
 (`"1"`, `"1-2"`, `"2-"`); `site.js` adds `is-on` while the bay is in one of them,
@@ -217,7 +218,8 @@ ladder. The Simple page adds `f` for the full site.
 
 `vercel.json` sets `default-src 'self'` with two exceptions: inline styles, and
 `frame-src` for the two products embedded live on their case pages (RideLens and
-RailDrop). Daylight is a macOS app and is linked, not framed. If you add any
+RailDrop). Daylight is a macOS app and Gridiron refuses to be framed
+(`frame-ancestors 'none'`), so both are linked, not framed. If you add any
 other external resource, that policy is the first thing to update or the browser
 will block it. The old résumé path `/assets/John_Jayasankar_Resume.pdf`
 redirects permanently to `/John_Jayasankar_Resume.pdf`.

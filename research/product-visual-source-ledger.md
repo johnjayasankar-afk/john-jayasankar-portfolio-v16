@@ -276,3 +276,43 @@ site. Both gained their markers back from the `dot` fix.
 Every card caption and every `aria-label` was rewritten to describe what its
 scene now actually draws, so the described behaviour and the rendered behaviour
 do not drift apart.
+
+---
+
+# Fourth pass · Gridiron (JJ-SYS-11), 14 September 2026
+
+Gridiron is John's own build, so, as with AgentFit, the repository is the
+primary source: its README and CHANGELOG at version 0.5.1, the ESPN and Kalshi
+data it captured for its replay lab, and the design screenshots its end-to-end
+suite writes. The story shows captured real games exactly as the app shows them.
+
+## Where every figure in the story comes from
+
+| Story figure | Source | Check |
+|---|---|---|
+| 6 live · 1 in overtime · 2 in the red zone | `docs/screenshots/slate-1440.png`, the NFL Week 1 replay at 4:33 PM ET | read off the capture |
+| NO at DET, OT 4:57, 24 to 31 · ARI at LAC, Q1 9:34, 0 to 0 | the same capture | ✓ |
+| Watch next: "Overtime · 7-point game", "Tying or go-ahead chance in the red zone" | the same capture | ✓ |
+| CHI at CAR, Q4 1:57, 59 to 37 · GB at MIN, Q1 12:11, 3 to 0 | `fixtures/espn/summary`, the last play before 20:33:38Z | clocks match the capture |
+| ARI drive: 10 plays, 65 yards, ARI 30 to 2nd & Goal at the LAC 5 | `summary/nfl-401872926.json`, drive 1, each play's start and end yard line | 27+2+0+11+5+4+2+0+11+3 = 65 |
+| ESPN win probability LAC 70% | `winprobability`, play 401872926272: 0.6959 | ✓ |
+| DraftKings LAC −8.5 · O/U 47.5 | `pickcenter` closing lines (they opened at −11.5 and 45.5) | ✓ |
+| Kalshi LAC to win 73.5¢ | `fixtures/kalshi/nfl-20260913.json`, the 20:33 minute: bid 0.73, ask 0.74, midpoint 0.735; the card writes it as −277 | ✓ |
+| Touchdown ARI, 5-yard run, Q1 8:49 · LAC 65%, ARI +5 | play 401872926301; 0.6489 after it; `formatSwing` rounds the 0.047 move to +5; "Touchdown ARI" is the title `shared/alerts.ts` writes | ✓ |
+| 446 tests · 60 Chrome journeys | `npm test` and `npm run test:e2e` at 0.5.1 | 446 passed · 67 passed, 60 in Chrome |
+
+## What the story deliberately leaves out
+
+- Player names, although the captured plays carry them.
+- Team colours. The window keeps the site's palette; the field is the deep
+  forest of Gridiron's own fields.
+- Anything the provider did not report. The ball moves only between reported
+  spots along the centre line; the incomplete pass and the run for no gain draw
+  nothing, because the ball did not move.
+- A live state. Every phase is the replay, and the bay says captured real games.
+
+## How it was built
+
+The case states that Gridiron was implemented with Claude Code from John's
+brief, because that is how it was built. Unlike the Cursor-built products, that
+is written into the case rather than left for a reader to assume.

@@ -1,4 +1,4 @@
-"""Systems JJ-SYS-07 to JJ-SYS-10.
+"""Systems JJ-SYS-07 to JJ-SYS-11.
 
 07 is verbatim from johnjayasankar.com.
 
@@ -9,6 +9,13 @@ ride-lens2.vercel.app, rail-drop3.vercel.app and daylight-app-wine.vercel.app.
 Nothing is inferred from code or invented. Figures shown in the stories are the
 products' own sample data (RailDrop's sample board, Daylight's Balanced preset)
 or clearly labelled illustrations.
+
+11 is Gridiron, John's live football command center, described from its own
+README and changelog at version 0.5.1 (github.com/johnjayasankar-afk/gridiron,
+live at gridiron-pink-chi.vercel.app). Every figure in its story is one the app
+shows while replaying its captured NFL Week 1 games; nothing is a sample or a
+mock-up. How it was built is stated as it happened: John's brief, implemented
+with Claude Code.
 
 The `lab` block carries the Labs site's card copy: number, category, tagline,
 description, and what each product refuses to fake."""
@@ -253,5 +260,79 @@ SYSTEMS_B = [
       B('live', 'Live', 'See the product', 'Daylight is a signed macOS menu-bar app. Its site runs the real schedule engine in the browser, explains Gatekeeper and certainty, and carries the download and the source.', kind='live'),
     ],
     also=['ridelens', 'raildrop', 'platform'],
+  ),
+  dict(
+    id='JJ-SYS-11', slug='gridiron', name='Gridiron', short='Gridiron', facet='independent',
+    kind='Labs · Live data', read='6 min',
+    title='Gridiron: every game, every drive, one view',
+    lede='A live NFL and college football command center. Every game gets its own 3D field with the reported ball spot, beside the score, win probability and odds from named sources.',
+    org='Independent · Labs', stage='0→1 · live product', year='2026', role='Product and builder',
+    metrics=[('3', 'sources, each named'), ('0', 'guessed ball spots'), ('446', 'unit and integration tests')],
+    ledger=('Labs · Live data', '3', 'sources, each named'),
+    lab=dict(n='04', cat='Live data', tagline='Every game. Every drive. One view.',
+             blurb='A live NFL and college football command center: a 3D field for every game, with the reported ball spot, win probability and odds beside it.',
+             does=['Follow every live NFL and college game, each on its own 3D field',
+                   'Draw only reported spots: the ball, the line of scrimmage, the line to gain',
+                   'Put ESPN win probability, DraftKings lines and Kalshi prices beside the score'],
+             rule='Reported, never guessed.',
+             rule_body='Every spot, clock and chance comes from a source that reported it. A missing ball spot says so; it is never guessed to midfield.'),
+    live='https://gridiron-pink-chi.vercel.app/', embed=False,
+    bay=dict(title='Gridiron · football command center', sub='NFL Week 1 replay · ARI at LAC · captured real games',
+             big='6 → 1', big_sub='live games → one view',
+             foot='Captured real games from Gridiron’s NFL Week 1 replay · figures as ESPN, DraftKings and Kalshi reported them · not betting advice'),
+    phases=[('Slate', .12, 'Replay of captured real games: six live at once, and Watch next names why ARI at LAC deserves attention.'),
+            ('Drive', .38, 'Reported spots only: 10 plays and 65 yards to 2nd & Goal at the LAC 5, where the goal line is the line to gain.'),
+            ('Odds', .62, 'Every chance is named: ESPN win probability LAC 70%, DraftKings closing lines, Kalshi LAC to win 73.5¢.'),
+            ('Touchdown', .86, 'A 5-yard touchdown run, announced once, and ESPN’s model moves ARI +5 on the play.')],
+    beats=[
+      B('broken', 'Broken', 'What was broken', 'On a busy Saturday or NFL Sunday, following several games closely means switching between broadcasts, tabs and scoreboards. A scoreboard says who leads. It does not say where the ball is, how the drive got there, or which game deserves attention next.'),
+      B('decision', 'Decision', 'Product decision', 'Make the field the interface. Give every game its own 3D field with the reported ball spot, possession, line of scrimmage and line to gain, and let the slate, four games in focus and a single game page share one live state. Draw only what a source reported: when a spot, a line or a chance is missing, say so instead of filling it in.'),
+      B('flow', 'Flow', 'Flow', [('Slate', 'Every game at once', 'Live games first, with Watch next naming why a game deserves attention.'),
+                                 ('Field', 'Every drive, spatially', 'The ball moves between reported spots, never along an invented route.'),
+                                 ('Moment', 'Know when it matters', 'Touchdowns, turnovers and red-zone trips, announced once and corrected honestly.')], kind='flow'),
+      B('does', 'What it does', 'What it does', ['A slate of every live NFL and college game, live first, with notable situations and a Watch next strip that names its reasons',
+                                                 'Focus on one, two or four games, or a wall of 4, 9 or 16, with a Director that follows the most important live situation and says why',
+                                                 'A game page with a 3D field and three cameras, drive replay, game flow, play-by-play, leaders and team stats',
+                                                 'ESPN win probability, DraftKings lines and Kalshi prices beside every game that has them, each named by its source',
+                                                 'Team pages, watch parties that follow the host’s view, and push alerts for favorite teams',
+                                                 'A replay lab of captured real games for when nothing is live, labeled on every screen'], kind='list'),
+      B('contract', 'Contract', 'Reported, never guessed', [('Spots come from the provider', 'The field-position label first, then the yard line, then the distance to the end zone. With none, the field says Ball spot unavailable.'),
+                                                            ('Clocks are never counted down', 'A clock shows what the provider last reported, not a local timer.'),
+                                                            ('Chances are never calculated', 'Win probability is ESPN’s model, lines are the sportsbook ESPN reports, prices are Kalshi’s, and each is named.'),
+                                                            ('Replays say so', 'Captured games are labeled on every screen, and deliberately edited test scenarios say Synthetic.')],
+        kind='grid', note='Routes, formations and tackle locations are not reported, so Gridiron never draws them. The ball sits on the centre line because no live provider reports where it is across the field.'),
+      B('field', 'The field', 'Reading the field', [('Away defends the left', 'The real stadium direction is not reported, so each field says which end each team defends.'),
+                                                    ('Blue and amber', 'Blue marks the line of scrimmage and amber the line to gain. On goal to go, the goal line lights instead.'),
+                                                    ('Shapes from the play type', 'Runs sweep and passes arc, kicks fly high, incompletions go out and come back, and sacks drop back.'),
+                                                    ('Rulebook markings', 'Hash marks, numbers, the try line, goal posts and pylons follow the 2026 NFL and NCAA rulebooks.')], kind='grid'),
+      B('odds', 'Odds', 'Odds and win probability', [('Win probability', 'ESPN’s model after each reported play, and its matchup predictor before kickoff.'),
+                                                     ('Sportsbook lines', 'Spread, moneyline and total with their opening lines, and after a game, how the result compared with the closing lines.'),
+                                                     ('Kalshi prices', 'Each team’s contract to win from Kalshi’s public market data, with no account or key, drawn beside ESPN’s model in game flow.')],
+        kind='grid', note='Shown for information only, not as betting advice.'),
+      B('engine', 'Engine', 'How it stays live', ['One server polls the provider for everyone and streams changes to each browser as small deltas, with a full resync when one cannot apply',
+                                                  'A game you have open refreshes every 12 seconds and a game on screen every 25, inside one shared request budget',
+                                                  'A spoiler delay holds scores, fields, odds and alerts on one timeline, so nothing leaks early',
+                                                  'A provider failure shows as delayed or unavailable with its reason, and is never replaced with other data'], kind='list'),
+      B('craft', 'Craft', 'Built to be watched', [('One canvas', 'A single WebGL canvas draws every field, and renders only when something changes.'),
+                                                  ('2D when it has to', 'Reduced effects, a 2D mode of SVG fields with no WebGL at all, and reduced motion respected.'),
+                                                  ('Accessible', 'Every field has a text summary, and an axe audit of WCAG 2.1 A and AA runs in the end-to-end suite.'),
+                                                  ('Tested', '446 unit and integration tests and 60 Chrome journeys at version 0.5.1, run against captured real games.')], kind='grid'),
+      B('limits', 'Not claimed', 'What it does not claim', ['Not official real-time tracking: the provider has its own delay, and a clock shows what was last reported',
+                                                            'College play-by-play is often incomplete; those games say Score-only coverage and carry no win probability',
+                                                            'Nothing was live while odds were built, so in-game line movement had not been observed; Gridiron calls them the latest lines reported',
+                                                            'Odds and prices are information, not betting advice'], kind='list'),
+      B('why', 'Why I built it', 'Why I built it', ['Following several games at once meant switching between broadcasts, tabs and scoreboards',
+                                                    'I wanted to understand the whole slate in seconds, see which games deserve attention, and follow drives spatially',
+                                                    'It had to be useful while watching, at a desk, or keeping up without a broadcast at all'], kind='list'),
+      B('built', 'How it was built', 'How it was built', ['I wrote the brief: the problem, the experience, the visual system, and the rule that nothing on screen is invented',
+                                                          'Implemented and iterated with Claude Code, release by release from 0.1 to 0.5.1 - product direction and quality judgment are mine',
+                                                          'React 19, Vite and React Three Fiber on the client; a Node server with a shared polling engine and server-sent events',
+                                                          'Deployed on Vercel as a bounded version that polls instead of streaming, and leaves out the replay lab, watch parties and push alerts, which need the persistent server'], kind='list'),
+      B('role', 'Role & tags', 'Role & tags', 'Product and builder. Wrote the brief, set the rule that nothing on screen is invented, and shipped the live product.',
+        kind='role', tags='Live data · 3D fields · Reported spots only · Named sources'),
+      B('impact', 'Impact', 'Impact', 'A live product: a 3D field for every game, Focus, the wall and the Director, a game page with drive replay and game flow, ESPN win probability, DraftKings lines and Kalshi prices, team pages, and a replay lab of captured real games. Shipped as a working product, not a pitch deck.'),
+      B('live', 'Live', 'See the product', 'Gridiron runs live on Vercel. When no game is on, it says so, with the next kickoffs and recent finals, and every game page, past or live, opens from there.', kind='live'),
+    ],
+    also=['ridelens', 'raildrop', 'daylight'],
   ),
 ]

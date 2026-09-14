@@ -36,7 +36,7 @@ DOM = P.SITE['domain']
 EMAIL = P.SITE['email']
 RESUME = P.SITE['resume']
 LABS_URL = P.SITE['labs']
-LASTMOD = '2026-09-13'
+LASTMOD = '2026-09-14'
 
 # Optical heights for the investor marks, matched by eye to a shared cap height.
 MARK_H = {'accel': 18, 'thoma-bravo': 20, 'firstmark': 13, 'spectrum-equity': 28,
@@ -327,7 +327,7 @@ def mega():
             '<a class="mega__big" href="/work"><span>All work</span><small>%02d systems, filterable</small></a>'
             '<a class="mega__big" href="/approach"><span>Approach</span><small>The control model</small></a>'
             '<a class="mega__card" href="/labs"><img src="/assets/img/work/daylight.jpg" alt="" width="640" height="400" loading="lazy" decoding="async">'
-            '<span class="mega__card-t">Labs</span><small>RideLens, Daylight, and RailDrop</small></a></div>') % len(SYSTEMS)
+            '<span class="mega__card-t">Labs</span><small>RideLens, Daylight, RailDrop, and Gridiron</small></a></div>') % len(SYSTEMS)
     lead = lead.replace('/assets/img/work/daylight.jpg', img_v('assets/img/work/daylight.jpg'))
     return '<div class="mega" id="mega-work" data-mega-panel><div class="mega__grid">%s%s</div></div>' % (lead, ''.join(cols))
 
@@ -656,7 +656,7 @@ def home():
 
     Lb = H['labs']
     labs = ('<section class="sect labsband" id="labs" data-locus data-label="Labs" aria-labelledby="labs-h"><div class="labsband__card" data-spot><div class="wrap">'
-            '%s<div class="labgrid">%s</div></div></div></section>\n') % (
+            '%s<div class="labgrid labgrid--pairs">%s</div></div></div></section>\n') % (
         shead(Lb['n'], Lb['kicker'], Lb['h2'], 'labs-h', Lb['lede'], cls=' shead--center shead--dark', dark=True,
               aside='<div class="actions actions--center">%s%s</div>' % (btn(Lb['link'][0], Lb['link'][1], 'mint'),
                                                                         btn(Lb['more'][0], Lb['more'][1], 'night'))),
@@ -717,7 +717,7 @@ def labs_page():
     index = ''.join('<li><a class="labindex__a" href="#%s"><span class="labindex__n">%s</span><span class="labindex__name">%s</span>'
                     '<span class="labindex__tag">%s</span></a></li>' % (s['slug'], s['lab']['n'], esc(s['name']), esc(s['lab']['tagline']))
                     for s in LABS)
-    extra = '<div class="actions actions--center">%s</div><ul class="labindex" aria-label="Products on this page">%s</ul>%s' % (acts, index, CONTINUE)
+    extra = '<div class="actions actions--center">%s</div><ul class="labindex labindex--four" aria-label="Products on this page">%s</ul>%s' % (acts, index, CONTINUE)
     head = pagehead('Labs', L['kicker'], L['h1'], L['lede'], extra, cls=' phead--center')
     feats = []
     for i, s in enumerate(LABS):
@@ -731,12 +731,12 @@ def labs_page():
     Sh = L['shared']
     # each card is watermarked with the product's own vocabulary
     words = dict(ridelens='Route Price Soonest Value Estimate Range Upfront', daylight='Schedule Resolve Explain Asked Accepted Confirmed',
-                 raildrop='Booked Watching Board Alert Listed Honest')
+                 raildrop='Booked Watching Board Alert Listed Honest', gridiron='Slate Drive Spot Chance Lines Touchdown')
     rules = ''.join('<li class="rule" data-words="%s" data-reveal%s><p class="rule__k">%s · %s</p><p class="rule__h">%s</p><p class="rule__p">%s</p></li>'
                     % (esc(' '.join([words[s['slug']]] * 3)), rd(i), esc(s['name']), esc(s['lab']['cat']), esc(s['lab']['rule']),
                        esc(s['lab']['rule_body'])) for i, s in enumerate(LABS))
     shared = ('<section class="sect" id="shared" data-locus data-label="What they share" aria-labelledby="shared-h"><div class="wrap">'
-              '%s<ul class="rules">%s</ul></div></section>\n') % (
+              '%s<ul class="rules rules--four">%s</ul></div></section>\n') % (
         shead(Sh['n'], Sh['kicker'], Sh['h2'], 'shared-h', Sh['lede'], cls=' shead--center'), rules)
     C = L['cta']
     visit = ('<section class="sect sect--tight" id="visit" data-locus data-label="Visit Labs" aria-labelledby="visit-h"><div class="wrap">'
