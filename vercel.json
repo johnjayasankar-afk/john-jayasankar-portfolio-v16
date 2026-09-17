@@ -26,7 +26,16 @@
       ]
     },
     {
-      "source": "/assets/(css|js|img)/(.*)",
+      "source": "/assets/(css|js)/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/img/(.*)",
       "headers": [
         {
           "key": "Cache-Control",
@@ -69,6 +78,22 @@
       "source": "/assets/John_Jayasankar_Resume.pdf",
       "destination": "/John_Jayasankar_Resume.pdf",
       "permanent": true
+    },
+    {
+      "source": "/work/iport",
+      "destination": "/work/setup-agent",
+      "permanent": true
+    },
+    {
+      "source": "/work/coco",
+      "destination": "/work/incident-agent",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/favicon.ico",
+      "destination": "/assets/img/favicon-32.png"
     }
   ]
 }

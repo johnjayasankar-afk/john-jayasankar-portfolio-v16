@@ -5,6 +5,65 @@ was actually verified, what is still open, and where the next cycle should look.
 
 ---
 
+## Cycle 16 - 2026-09-17 · Polish: light, line breaks, phones
+
+**Why this.** John asked for one more pass on visual polish, keeping the animations,
+colors and layout he likes. This cycle follows the September 16 and 17 passes on
+names, masked figures and the disclaimer, and changes no copy or names.
+
+### Shipped (both sites unless noted)
+
+1. **Page heads answer the pointer.** On a mouse or trackpad, the page's own dot grid
+   lights up in forest green around the pointer in the home hero, page heads and
+   case heads. The lit dots land exactly on the page's 24px grid. Not shown with
+   reduced motion or on touch screens.
+2. **The footer's big word catches the light.** "Jayasankar." and "Labs." brighten
+   where the pointer is, fading in and out.
+3. **The footer's mint bands unfold on arrival**, the way the hero's do when a page
+   opens. A footer already on screen when the page loads stays as it is.
+4. **Arrows never start a line.** `.to` is now an inline arrow held to the word
+   before it by a no-break space, so the About heading reads "Financial systems →
+   / product ownership → / production AI", and "0→1" can no longer split.
+5. **Rate labels keep their slash clause together** ("reduction / run",
+   "errors / 6 mo"), and stat labels are balanced. Paragraphs use
+   `text-wrap: pretty`.
+6. **Phones.**
+   - Phase tabs stay on one row: the current phase shows its name and the others
+     show their number.
+   - The back-to-top button waits for a scroll back up, so it no longer covers
+     text while reading down.
+   - About's case chips wrap as a unit.
+   - The home headline is balanced (portfolio).
+7. **About (portfolio):** the Plain terms heading sits at the top of its panel,
+   beside the glossary.
+8. **Writing (portfolio):** the title is two lines on desktop, and "Copy link" sits
+   at the end of the Substack row instead of on its own line.
+9. **Link preview:** `og/cross-currency.jpg` was captured again. The other images
+   were re-rendered for comparison and matched within 0.1/255 on average, so they
+   were left alone.
+
+### Verified
+
+- Both builds clean.
+- 46 page loads (every page of both sites at 1440 and 390) with no console errors
+  besides the 404 page's own 404, and no horizontal overflow.
+- Pointer effects driven with synthetic pointer events and checked at 2x. Reduced
+  motion creates no grid light.
+- The back-to-top logic scripted: hidden scrolling down and shown scrolling up on a
+  phone, unchanged on desktop.
+- The unfold sampled at 60, 240, 440 and 1840 ms.
+
+### Not verified
+
+- Safari, Firefox and a physical phone.
+
+### Where the next cycle should look
+
+- Speculation rules (prefetch on hover) were considered and left out. They need
+  `'inline-speculation-rules'` in the CSP, which other browsers warn about.
+
+---
+
 ## Cycle 15 - 2026-09-14 · Gridiron joins Labs
 
 **Why this.** John asked for Gridiron, his live football command center, to be
@@ -121,13 +180,13 @@ decorative to assistive technology, since each card says the same in words.
 
 **3. Stories, final pass.**
 - The pointer that presses a button now carries a name tag: Operator releases the
-  I-Port gate, Human approves at the home gate and the platform's HITL layer, Desk
+  setup agent's gate, Human approves at the home gate and the platform's HITL layer, Desk
   simulates the OpenGamma trade, You compare rides and watch a trip.
 - Attention moves through the rows: a soft light sweeps each row as the agent
-  reaches it (I-Port, QT CoCo, ForexClear), and an amber wash holds on a row
+  reaches it (setup agent, incident agent, FX compression), and an amber wash holds on a row
   waiting on a person or a gate.
-- QT CoCo's decision row fills an evidence packet while facts arrive. LCH
-  SwapAgent draws its reduction per run as two bars, bilateral against
+- The incident agent's decision row fills an evidence packet while facts arrive.
+  Cross-currency compression draws its reduction per run as two bars, bilateral against
   multilateral at the case's 1 : 1.34. The platform's dashed spine flows while a
   request travels down it.
 
@@ -163,7 +222,7 @@ Headless Chrome over the DevTools protocol against the local build:
   elements checked for contrast; the only flags are the known home proof figures.
 - **Caught and fixed on the way**: the "Cost of being wrong" chip overlapped the
   Exception node; later rows and layers painted over the pointer name tags on
-  I-Port and the platform (the active row now rises above its neighbours); the
+  the setup agent and the platform (the active row now rises above its neighbours); the
   reliability drawing read small and gained a caption and larger checkpoints; the
   multilateral bar was labelled "Network", which clashed with the network row.
 
@@ -187,23 +246,23 @@ the site, feel complete, polished and sleek, and to add it to every one of them.
 - Home showcase: each agent card's bar falls to its real ratio (8 of 210
   minutes, 11 of 270), a typed action travels into the gate and on to the
   market, and a pointer presses Approve.
-- I-Port: the operator row starts as "Owned by senior engineering", a pointer
+- Setup agent: the operator row starts as "Owned by senior engineering", a pointer
   presses Release at the gate, checks settle row by row, and setup runs down from
   210 minutes to 8.
-- QT CoCo: the incident rings "Paging engineering" before any evidence, run and
+- Incident agent: the incident rings "Paging engineering" before any evidence, run and
   ops facts arrive in order with noise struck out, time runs down from 270
   minutes to 11, and escalations count to −78%.
-- LCH SwapAgent: a scan circles the hub while the run settles offsets, and +34%
+- Cross-currency compression: a scan circles the hub while the run settles offsets, and +34%
   counts up.
-- Simplified Compression: rows outside tolerance turn amber, then their dots move
+- Dual-source valuation: rows outside tolerance turn amber, then their dots move
   inside the band as the sources agree; the 48-hour gap draws in before the live
   window; −91% counts up.
-- ForexClear: eligibility, margin and the four sources clear in order, and
+- FX compression: eligibility, margin and the four sources clear in order, and
   acceptance counts to 100%.
-- AI Platform & Controls: finished layers turn mint as the request passes, a
+- Agent Platform & Controls: finished layers turn mint as the request passes, a
   pointer approves the HITL step, and at evaluation the five systems check off
   and "Production-ready" lands.
-- OpenGamma What-If: the hypothetical trade slides in, a pointer presses
+- Pre-trade margin simulator: the hypothetical trade slides in, a pointer presses
   Simulate, and a hatched span shows what offsets in the book take off the
   standalone cost.
 - RideLens: two of the product's quick-fill hubs type themselves into From and
@@ -282,9 +341,9 @@ abstract. Replacing them lets each system show what it actually changed.
 **1. Stories.** Each of the ten systems, and the home showcase, is now a story: a
 light dotted stage holding one schematic product window, drawn in HTML and CSS
 with the site's tokens and fonts. Each bay phase is a state of that window.
-I-Port's setup rows fill with authorised context, its typed actions wait for an
-operator, and the setup bar falls from 3.5 hours to 8 minutes. SwapAgent's
-pairwise network settles through a hub with $6.5T eligible. RailDrop's window is
+The setup agent's rows fill with authorised context, its typed actions wait for an
+operator, and the setup bar falls from 3.5 hours to 8 minutes. The cross-currency
+pairwise network settles through a hub with $X.XT eligible. RailDrop's window is
 its own sample board. Daylight draws the Balanced preset, the six-layer ladder,
 the sentence the app writes and its readback. Notes and metrics float beside the
 window when the frame is wide enough. `tools/stories.py` builds them, and
@@ -293,8 +352,8 @@ window when the frame is wide enough. `tools/stories.py` builds them, and
 **2. Held to the case copy.** Every label and figure in a story comes from its
 case or from the product's own published sample data, and every bay footer says
 Schematic or Illustrative. Two first drafts went further than the copy and were
-cut: an Edit control on the I-Port gate (the case only has operators releasing
-actions) and "OTC SIMM" among the OpenGamma venues (the case names OTC). RideLens
+cut: an Edit control on the setup agent's gate (the case only has operators releasing
+actions) and a named OTC margin model among the OpenGamma venues (the case names OTC). RideLens
 ranks quote types, not providers, because nothing published says which provider
 wins.
 
@@ -315,7 +374,7 @@ stories at 2x. Image URLs now carry content hashes like the CSS and JS:
 `/assets/img` is cached for a week, and returning visitors would otherwise keep
 seeing the old dark thumbnails.
 
-**6. Fixed along the way.** CoCo's card metric read "4.5h → 1…": card stat columns
+**6. Fixed along the way.** The incident agent's card metric read "4.5h → 1…": card stat columns
 now never shrink below the figure they hold. Reversed rows on the Labs page gave
 the bay the narrow column; the bay now gets the wide one.
 
@@ -340,7 +399,7 @@ Headless Chrome over the DevTools protocol against the local build:
   page's own 404. 3,134 text elements checked for contrast; the only flags are the
   home proof figures, the pseudo-element false positive recorded in cycle 10.
 - **Screenshots reviewed.** Every story at every phase; the home showcase, featured
-  cards and Labs band at 1440 and 390; the Labs page; Work; I-Port, SwapAgent,
+  cards and Labs band at 1440 and 390; the Labs page; Work; setup agent, cross-currency,
   RailDrop and Approach bays; Daylight at 390; all thumbnails and the social card.
 
 ### Not verified
@@ -550,7 +609,7 @@ and Earned differ). Opportunity OS displayed an interpolated "FIT 72" that the
 product never computes (the score now switches between the two denominators).
 Compression's Risk envelope tab was identical to Compressed (the envelope now
 lights). Scenes composed for a 6:5 panel floated small in 16:10 bays, so each
-now declares a measured `frame`. Label collisions in CoCo, the FX corridor and
+now declares a measured `frame`. Label collisions in the incident agent, the FX corridor and
 Daylight were moved apart.
 
 **5. Around the content.** Command palette, keyboard grammar, continue chip,

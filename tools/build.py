@@ -36,12 +36,8 @@ DOM = P.SITE['domain']
 EMAIL = P.SITE['email']
 RESUME = P.SITE['resume']
 LABS_URL = P.SITE['labs']
-LASTMOD = '2026-09-14'
-
-# Optical heights for the investor marks, matched by eye to a shared cap height.
-MARK_H = {'accel': 18, 'thoma-bravo': 20, 'firstmark': 13, 'spectrum-equity': 28,
-          'dawn-capital': 13.5, 'allianz-x': 25, 'lseg': 14, 'cme-group': 21,
-          'jpx': 16, 'trading-technologies': 19}
+LASTMOD = '2026-09-16'
+UPDATED = __import__('datetime').date.fromisoformat(LASTMOD).strftime('%B %Y')
 
 NEWTAB = '<span class="sr-only"> (opens in a new tab)</span>'
 V = {}
@@ -68,9 +64,30 @@ def esc(s):
     return html.escape(str(s), quote=True)
 
 
+MASK = re.compile(r'\$X(?:\.X)?[MBT]\+?')
+
+
+def masked(html_text):
+    """A dollar figure withheld on the site ($XM+, $X.XT) is set as a deliberate mark, not a placeholder."""
+    return MASK.sub(lambda m: '<span class="mask" title="Exact figure withheld">%s</span>' % m.group(0), html_text)
+
+
+def keep_words(html_text):
+    """A number joined to its unit by a hyphen ('3.5-hour') never breaks across lines."""
+    return re.sub(r'(\d+(?:\.\d+)?-[a-z]+)', r'<span class="nowrap">\1</span>', html_text)
+
+
 def mval(v):
-    """A metric value or heading. The arrow in '3.5h → 8m' is drawn, and read as 'to'."""
-    return esc(v).replace('→', '<i class="to" aria-hidden="true">→</i><span class="sr-only"> to </span>')
+    """A metric value or heading. The arrow in '3.5h → 8m' is drawn, and read as 'to'. It
+    stays with the word before it, so a line never starts with an arrow."""
+    text = esc(v).replace(' →', '\u00a0→')
+    return masked(text.replace('→', '<i class="to" aria-hidden="true">→</i><span class="sr-only"> to </span>'))
+
+
+def rate(k):
+    """A rate label ('eng hours / year', 'AI config errors / 6 mo') keeps its slash clause on
+    one line, with no-break spaces rather than markup, so no card's own span styles reach it."""
+    return re.sub(r'\S+ / (?:\d+ )?\S+', lambda m: m.group(0).replace(' ', '\u00a0'), esc(k))
 
 
 def plain(v):
@@ -97,6 +114,12 @@ def fingerprint(rel):
 def img_v(rel):
     """An image URL stamped with its content hash, like the CSS and JS."""
     return '/%s?v=%s' % (rel, fingerprint(rel))
+
+
+def thumb(s):
+    """A system's card image, its story at rest. A system renamed since its image
+    was rendered names the earlier file in `thumb`."""
+    return img_v('assets/img/work/%s.jpg' % s.get('thumb', s['slug']))
 
 
 def og_img():
@@ -185,7 +208,7 @@ def count_attr(v):
 
 
 def stat(v, k, cls='stat'):
-    return '<li class="%s"><b class="stat__v"%s>%s</b><span class="stat__k">%s</span></li>' % (cls, count_attr(v), mval(v), esc(k))
+    return '<li class="%s"><b class="stat__v"%s>%s</b><span class="stat__k">%s</span></li>' % (cls, count_attr(v), mval(v), rate(k))
 
 
 def rd(i):
@@ -211,7 +234,7 @@ HEAD = """<!doctype html>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{{title}}</title>
 <meta name="description" content="{{desc}}">
-<link rel="canonical" href="{{url}}">
+{{canonical}}
 <meta name="author" content="John Jayasankar">
 <meta name="robots" content="{{robots}}">
 <meta name="theme-color" content="{{theme}}">
@@ -231,6 +254,9 @@ HEAD = """<!doctype html>
 <meta name="twitter:image" content="{{ogimg}}">
 <meta name="twitter:image:alt" content="{{ogalt}}">
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<noscript><style>.hdr__bar { background: rgba(248, 246, 241, .94); }</style></noscript>
 {{preload}}<link rel="stylesheet" href="/assets/css/{{sheet}}?v={{v}}">
 {{ld}}</head>
 """
@@ -274,7 +300,7 @@ FOOTER = """<footer class="ftr">
         <nav class="ftr__col" aria-label="Elsewhere"><p class="ftr__h">Elsewhere</p>{{elsewhere}}</nav>
       </div>
       <p class="ftr__word" aria-hidden="true">Jayasankar<span>.</span></p>
-      <div class="ftr__base"><span>© {{year}} John Jayasankar</span><span class="ftr__locus" data-locus-label>{{label}}</span><span>New York<span class="ftr__clock" data-clock hidden></span></span></div>
+      <div class="ftr__base"><span>© {{year}} John Jayasankar · Updated {{updated}}</span><span class="ftr__locus" data-locus-label>{{label}}</span><span>New York<span class="ftr__clock" data-clock hidden></span></span><p class="ftr__legal">{{legal}}</p></div>
     </div>
   </div>
 </footer>
@@ -290,7 +316,7 @@ OVERLAYS = TOTOP + """<div class="toast" role="status" aria-live="polite" data-t
     <p class="sr-only" id="cmdk-title">Jump anywhere</p>
     <div class="cmdk__bar">
       <span class="cmdk__glyph" aria-hidden="true">""" + SEARCH + """</span>
-      <input class="cmdk__input" data-cmdk-input type="text" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search systems, pages and notes, or type ? for keys">
+      <input class="cmdk__input" data-cmdk-input type="text" aria-label="Search the site" role="combobox" aria-expanded="true" aria-controls="cmdk-list" aria-autocomplete="list" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Search systems, pages and notes, or type ? for keys">
       <button class="cmdk__esc" type="button" data-cmdk-close>Esc</button>
     </div>
     <ul class="cmdk__list" id="cmdk-list" role="listbox" aria-label="Results" data-cmdk-list></ul>
@@ -298,16 +324,6 @@ OVERLAYS = TOTOP + """<div class="toast" role="status" aria-live="polite" data-t
   </div>
 </div>
 """
-
-
-def marks(dup):
-    out = []
-    for key, name in P.MARKS:
-        ar = svg_ratio('assets/img/vc-%s.svg' % key)
-        label = '' if dup else ' role="img" aria-label="%s"' % esc(name)
-        out.append('<li class="mq__item"><span class="mark" style="--m:url(/assets/img/vc-%s.svg);--ar:%.4f;--h:%gpx"%s></span></li>'
-                   % (key, ar, MARK_H[key], label))
-    return ''.join(out)
 
 
 def mark_span(key, max_w, max_h, prefix='logo'):
@@ -326,7 +342,7 @@ def mega():
     lead = ('<div class="mega__lead"><p class="mega__h">Overview</p>'
             '<a class="mega__big" href="/work"><span>All work</span><small>%02d systems, filterable</small></a>'
             '<a class="mega__big" href="/approach"><span>Approach</span><small>The control model</small></a>'
-            '<a class="mega__card" href="/labs"><img src="/assets/img/work/daylight.jpg" alt="" width="640" height="400" loading="lazy" decoding="async">'
+            '<a class="mega__card" href="/labs"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="/assets/img/work/daylight.jpg" alt="" width="640" height="400" decoding="async">'
             '<span class="mega__card-t">Labs</span><small>RideLens, Daylight, RailDrop, and Gridiron</small></a></div>') % len(SYSTEMS)
     lead = lead.replace('/assets/img/work/daylight.jpg', img_v('assets/img/work/daylight.jpg'))
     return '<div class="mega" id="mega-work" data-mega-panel><div class="mega__grid">%s%s</div></div>' % (lead, ''.join(cols))
@@ -356,7 +372,8 @@ def footer(label):
     labs = ''.join('<a href="/work/%s">%s</a>' % (s['slug'], esc(s['name'])) for s in LABS) + link('Labs site', LABS_URL)
     elsewhere = ''.join(link(esc(l), h) if ext else '<a href="%s">%s</a>' % (esc(h), esc(l)) for l, h, ext in P.ELSEWHERE)
     return render(FOOTER, year=P.SITE['year'], label=esc(label), tagline=esc(P.SITE['tagline']), email=EMAIL, arrow=ARROW,
-                  resume=btn('Résumé', RESUME, 'night'), site=site, work=work, labs=labs, elsewhere=elsewhere)
+                  resume=btn('Résumé', RESUME, 'night'), site=site, work=work, labs=labs, elsewhere=elsewhere,
+                  legal=esc(P.LEGAL_LINE) + ' <a href="/legal">Disclaimer</a>', updated=UPDATED)
 
 
 def scripts():
@@ -371,11 +388,12 @@ def ld_block(ld):
     return '<script type="application/ld+json">%s</script>\n' % json.dumps(ld, ensure_ascii=False).replace('</', '<\\/')
 
 
-def shell(page, path, title, desc, label, body, og_type='website', robots='index, follow', ld=None, section=None):
+def shell(page, path, title, desc, label, body, og_type='website', robots='index, follow', ld=None, section=None, og=None):
     return ''.join([
         render(HEAD, page=page, title=esc(title), desc=esc(desc), url=esc(DOM + path), robots=robots, theme='#f8f6f1',
-               ogtype=og_type, ogimg=esc(og_img()), ogalt=esc(P.SITE['og_alt']), preload=PRELOAD,
-               sheet='site.css', v=V['css'], ld=ld_block(ld)),
+               canonical='' if robots.startswith('noindex') else '<link rel="canonical" href="%s">' % esc(DOM + path),
+               ogtype=og_type, ogimg=esc(DOM + img_v(og[0]) if og else og_img()), ogalt=esc(og[1] if og else P.SITE['og_alt']),
+               preload=PRELOAD, sheet='site.css', v=V['css'], ld=ld_block(ld)),
         '<body data-label="%s">\n' % esc(label),
         chrome_top(page, section),
         '<main id="main" tabindex="-1">\n', body, '</main>\n',
@@ -392,9 +410,13 @@ def person_ld():
         'jobTitle': 'Lead Product Manager', 'url': DOM + '/', 'image': DOM + '/assets/img/portrait-sq.jpg',
         'email': 'mailto:' + EMAIL,
         'address': {'@type': 'PostalAddress', 'addressLocality': 'New York', 'addressRegion': 'NY', 'addressCountry': 'US'},
-        'worksFor': {'@type': 'Organization', 'name': 'Quantile Technologies'},
+        'description': 'Lead Product Manager building production AI agents and 0→1 financial infrastructure.',
+        'knowsAbout': ['AI agents', 'LLM orchestration', 'Model Context Protocol', 'Agent evaluation', 'Human-in-the-loop controls',
+                       'Derivatives compression', 'Portfolio optimization', 'Initial margin'],
+        'worksFor': {'@type': 'Organization', 'name': 'Quantile Technologies', 'url': 'https://www.quantile.com/',
+                     'parentOrganization': {'@type': 'Organization', 'name': 'LSEG', 'url': 'https://www.lseg.com/'}},
         'alumniOf': {'@type': 'CollegeOrUniversity', 'name': 'Haverford College'},
-        'sameAs': [P.SITE['linkedin'], P.SITE['substack']],
+        'sameAs': [P.SITE['linkedin'], P.SITE['substack'], LABS_URL],
     }
 
 
@@ -497,9 +519,9 @@ def note_cards(level='h3', page=False):
         out.append('<li class="ncard ncard--%d"%s data-reveal%s><a class="ncard__a" href="%s">'
                    '<div class="ncard__cover">%s</div>'
                    '<div class="ncard__body"><p class="ncard__tag">%02d · %s</p><%s class="ncard__t">%s</%s>'
-                   '<p class="ncard__d">%s</p><p class="ncard__go"><span>Read</span>%s</p></div></a></li>'
+                   '<p class="ncard__d">%s</p><p class="ncard__go"><span>%s</span>%s</p></div></a></li>'
                    % (i + 1, ident, rd(i), href, ideas.render(ideas.NOTE_KEYS[n['id']], attrs=' data-thumb data-autoplay'), i + 1, esc(n['tag']), level, esc(n['title']), level,
-                      esc(n['dek']), ARROW))
+                      esc(n['dek']), esc(n['go']), ARROW))
     return ''.join(out)
 
 
@@ -517,9 +539,12 @@ def shead(n, kicker, h2, hid, lede=None, aside='', cls='', dark=False):
 
 
 def marquee(label, note):
+    """The strip under the home showcase: what the work covers, as pills that drift past."""
+    items = ''.join('<li class="mq__item mq__item--text">%s<span>%s</span></li>' % (stories.ico(key, 'mq__ico'), mval(text))
+                    for key, text in P.DOMAINS)
     return ('<section class="mq" aria-label="%s"><div class="wrap mq__head"><p class="mq__label">%s</p><p class="mq__note">%s</p></div>'
             '<div class="mq__view"><ul class="mq__track">%s</ul><ul class="mq__track" aria-hidden="true">%s</ul></div></section>\n') % (
-        esc(label), esc(label), esc(note), marks(False), marks(True))
+        esc(label), esc(label), esc(note), items, items)
 
 
 # ----------------------------------------------------------------------------
@@ -597,8 +622,8 @@ def showcase():
 def feature_card(s, i, wide=False):
     ctx = s['org'] + ((' · ' + s['year']) if s['year'] else '')
     return render(FCARD_TPL, wide=' fcard--wide' if wide else '', slug=s['slug'], short=esc(s['short']), rd=rd(i),
-                  id=s['id'], kind=esc(s['kind']), ctx=esc(ctx), title=esc(s['title']), lede=esc(s['lede']),
-                  metrics=''.join(stat(v, k) for v, k in s['metrics']), go=tlink('Read the case', '/work/' + s['slug']),
+                  id=s['id'], kind=esc(s['kind']), ctx=esc(ctx), title=keep_words(esc(s['title'])), lede=esc(s['lede']),
+                  metrics=''.join(stat(v, k) for v, k in s['metrics']), go=tlink('Read the case', '/work/' + s['slug']).replace('Read the case</span>', 'Read the case</span><span class="sr-only">: %s</span>' % esc(s['name']), 1),
                   bay=system_bay(s, 'bay-' + s['slug'], 'compact'))
 
 
@@ -686,7 +711,7 @@ def home():
         btn('Email me', 'mailto:' + EMAIL, 'primary', arrow=True) + btn('LinkedIn', P.SITE['linkedin'], 'ghost') + btn('Résumé', RESUME, 'ghost'),
         hint(H['hint']))
 
-    body = hero + marquee(H['marks']['label'], H['marks']['note']) + featured + before_after + labs + approach + writing + contact
+    body = hero + marquee(H['strip']['label'], H['strip']['note']) + featured + before_after + labs + approach + writing + contact
     title, desc = P.META['home']
     return shell('home', '/', title, desc, 'Home', body, ld=person_ld())
 
@@ -713,7 +738,7 @@ LABFEAT_TPL = """<section class="labfeat{{rev}}" id="{{slug}}" data-locus data-l
 
 def labs_page():
     L = P.LABS
-    acts = btn('Visit Labs', LABS_URL, 'primary', 'lg') + btn('Labs on Work', '/work?f=independent', 'ghost', 'lg')
+    acts = btn('Visit Labs', LABS_URL, 'primary', 'lg') + btn('See them on Work', '/work?f=independent', 'ghost', 'lg')
     index = ''.join('<li><a class="labindex__a" href="#%s"><span class="labindex__n">%s</span><span class="labindex__name">%s</span>'
                     '<span class="labindex__tag">%s</span></a></li>' % (s['slug'], s['lab']['n'], esc(s['name']), esc(s['lab']['tagline']))
                     for s in LABS)
@@ -781,10 +806,10 @@ def work():
     rows = []
     for s in SYSTEMS:
         org = s['org'] + ((' · ' + s['year']) if s['year'] else '')
-        metrics = ''.join('<span class="wmetric"><b>%s</b><i>%s</i></span>' % (mval(v), esc(k)) for v, k in s['metrics'])
+        metrics = ''.join('<span class="wmetric"><b>%s</b><i>%s</i></span>' % (mval(v), rate(k)) for v, k in s['metrics'])
         live = link('<span>Open %s</span>' % esc(s['name']), s['live'], 'tlink wrow__live') if s.get('live') else ''
         rows.append(render(WROW_TPL, slug=s['slug'], facet=s['facet'], short=esc(s['short']), id=s['id'],
-                           fname=FACET_NAME[s['facet']], title=esc(s['title']), role=esc(s['role']), lede=esc(s['lede']),
+                           fname=FACET_NAME[s['facet']], title=keep_words(esc(s['title'])), role=esc(s['role']), lede=esc(s['lede']),
                            metrics=metrics, org=esc(org), story=stories.render(s['slug'], attrs=' data-thumb data-autoplay'), arrow=ARROW,
                            phases=' <span class="wrow__arr" aria-hidden="true">→</span> '.join(
                                '<span data-phase="%d"%s>%s</span>' % (j, ' class="is-cur"' if j == stories.STORIES[s['slug']]['rest'] else '', esc(p[0]))
@@ -849,7 +874,7 @@ CASE_TPL = """<section class="casehead" id="top">
 EMBED_TPL = """<figure class="embed" data-embed>
 <div class="embed__bar" aria-hidden="true"><span class="embed__dots"><i></i><i></i><i></i></span><span class="embed__url">{{host}}</span><span class="embed__live"><i></i>Live</span></div>
 <div class="embed__frame"><p class="embed__wait" data-embed-wait>Opening the live product.</p><iframe src="{{src}}" title="{{name}} live preview" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe></div>
-<figcaption class="embed__cap">Live product preview · the working app, not a mock · scroll inside the frame to explore. If it stays blank, open the product in a new tab - some browsers block embeds.</figcaption>
+<figcaption class="embed__cap">Live product preview · the working app, not a mock · scroll inside the frame to explore. If it stays blank, open the product in a new tab, because some browsers block embeds.</figcaption>
 </figure>"""
 
 CLOSE_TPL = """<div class="closeout">
@@ -857,8 +882,6 @@ CLOSE_TPL = """<div class="closeout">
     <span class="nextcard__copy"><small>Next system</small><strong>{{nname}}</strong><em><b>{{nv}}</b> · {{nk}}</em><span class="nextcard__go"><span>Read the case</span>{{arrow}}</span></span>
     <span class="nextcard__img"><img src="{{nimg}}" alt="" width="640" height="400" loading="lazy" decoding="async"></span>
   </a>
-  <div class="closeout__tools"><button class="tbtn" type="button" data-copy-brief>Copy brief</button><a class="tbtn" href="/work">All systems</a><a class="tbtn" href="/labs">Labs</a><a class="tbtn" href="/approach">Approach</a></div>
-  {{mail}}
   <p class="also"><span class="also__k">Also see</span>{{also}}</p>
 </div>
 <nav class="casenav" aria-label="Adjacent cases">
@@ -890,10 +913,11 @@ def beat_html(s, bt, j):
     elif k == 'live':
         inner = '<p class="beat__p">%s</p>' % esc(bt['body'])
         if s.get('embed'):
-            inner += render(EMBED_TPL, src=esc(s['live']), host=esc(host(s['live'])), name=esc(s['name']))
+            inner += render(EMBED_TPL, src=esc(s['live']), host=esc(s['name'] + ' · live product'), name=esc(s['name']))
         inner += '<p class="beat__cta">%s</p>' % btn('Open ' + s['name'], s['live'], 'primary')
     else:
         raise ValueError('unknown beat kind: ' + k)
+    inner, note = masked(inner), masked(note)
     key = bt['key']
     return ('<section class="beat beat--%s" id="%s" data-beat data-locus data-label="%s" aria-labelledby="%s-h">'
             '<header class="beat__head"><span class="beat__n" aria-hidden="true">%02d</span><h2 class="beat__h" id="%s-h">%s</h2></header>%s%s</section>\n') % (
@@ -928,24 +952,24 @@ def case(s, idx):
     acts = []
     if s.get('live'):
         acts.append(btn('Open ' + s['name'], s['live'], 'primary'))
-    acts.append(btn('All Labs' if lab else 'All systems', '/labs' if lab else '/work', 'ghost' if s.get('live') else 'primary', arrow=False))
-    acts.append(btn('Next: ' + nxt['name'], '/work/' + nxt['slug'], 'ghost'))
+    acts.append(btn('Next: ' + nxt['name'], '/work/' + nxt['slug'], 'ghost' if s.get('live') else 'primary'))
+    acts.append(btn('All Labs' if lab else 'All work', '/labs' if lab else '/work', 'ghost', arrow=False))
     meta = ''.join('<li>%s</li>' % esc(x) for x in [s['org'], s['stage'], s['year'], s['role']] if x)
     toc = ''.join('<a href="#%s" data-beat-link="%s"><span>%02d</span>%s</a>' % (b['key'], b['key'], j + 1, esc(b['label']))
                   for j, b in enumerate(beats))
-    facts = [('Status', s['stage']), ('Domain', s['org']), ('My role', s['role']), ('Internal', s['name'])]
+    facts = [('Status', s['stage']), ('Where', s['org']), ('My role', s['role']), ('System', s['name'])]
     if s['year']:
         facts.append(('Year', s['year']))
     facts_html = ''.join('<div><dt>%s</dt><dd>%s</dd></div>' % (k, mval(v)) for k, v in facts)
     if s.get('live'):
         facts_html += '<div><dt>Live</dt><dd>%s</dd></div>' % link('<span>Open %s</span>' % esc(s['name']), s['live'], 'tlink')
     also = '<span class="sep" aria-hidden="true">·</span>'.join(
-        '<a class="tlink" href="/work/%s"><span>%s</span></a>' % (a, esc(BY[a]['name'])) for a in s['also'])
-    closeout = render(CLOSE_TPL, nimg=img_v('assets/img/work/%s.jpg' % nxt['slug']), nslug=nxt['slug'], nname=esc(nxt['name']), nv=mval(nxt['ledger'][1]), nk=esc(nxt['ledger'][2]),
-                      pslug=prv['slug'], pname=esc(prv['name']), mail=mail(), also=also, arrow=ARROW,
+        '<a class="tlink" href="/work/%s"><span>%s</span></a>' % (a, esc(BY[a]['name'])) for a in s['also'] if a != nxt['slug'])
+    closeout = render(CLOSE_TPL, nimg=thumb(nxt), nslug=nxt['slug'], nname=esc(nxt['name']), nv=mval(nxt['ledger'][1]), nk=esc(nxt['ledger'][2]),
+                      pslug=prv['slug'], pname=esc(prv['name']), also=also, arrow=ARROW,
                       hint=hint('1-%d beats · j / k · ← → adjacent · y link · b brief' % min(9, len(beats))))
     body = render(CASE_TPL, sec='Labs' if lab else 'Work', sec_href='/labs' if lab else '/work',
-                  id=s['id'], name=esc(s['name']), kind=esc(s['kind']), read=esc(s['read']), title=esc(s['title']),
+                  id=s['id'], name=esc(s['name']), kind=esc(s['kind']), read=esc(s['read']), title=keep_words(esc(s['title'])),
                   lede=esc(s['lede']), meta=meta, actions=''.join(acts), metrics=metrics,
                   bay=system_bay(s, 'bay-case', 'steps'), short=esc(s['short']), b0=esc(beats[0]['label']),
                   nb='%02d' % len(beats), toc=toc, segs=''.join('<i data-seg="%s"></i>' % k for k in keys), facts=facts_html,
@@ -953,14 +977,17 @@ def case(s, idx):
                   brief=json.dumps({'text': brief_text(s)}, ensure_ascii=False).replace('</', '<\\/'))
     desc = P.CASE_DESC.get(s['slug'], s['lede'])
     ld = [{'@context': 'https://schema.org', '@type': 'TechArticle', 'headline': s['title'], 'description': desc,
-           'author': {'@type': 'Person', 'name': 'John Jayasankar', 'url': DOM + '/'}, 'about': s['org'],
+           'author': {'@type': 'Person', 'name': 'John Jayasankar', 'url': DOM + '/'}, 'dateModified': LASTMOD,
+           'isPartOf': {'@type': 'WebSite', 'name': 'John Jayasankar', 'url': DOM + '/'},
            'url': DOM + '/work/' + s['slug'], 'image': og_img()},
           {'@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
               {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': DOM + '/'},
               {'@type': 'ListItem', 'position': 2, 'name': 'Labs' if lab else 'Work', 'item': DOM + ('/labs' if lab else '/work')},
               {'@type': 'ListItem', 'position': 3, 'name': s['name'], 'item': DOM + '/work/' + s['slug']}]}]
+    card = 'assets/img/og/%s.jpg' % s['slug']
+    og = (card, '%s · %s · John Jayasankar' % (s['name'], s['title'])) if os.path.isfile(os.path.join(ROOT, card)) else None
     return shell('case', '/work/' + s['slug'], s['name'] + ' · John Jayasankar', desc, s['short'], body,
-                 og_type='article', ld=ld, section='labs' if lab else 'work')
+                 og_type='article', ld=ld, section='labs' if lab else 'work', og=og)
 
 
 # ----------------------------------------------------------------------------
@@ -1010,7 +1037,7 @@ ABOUT_TPL = """<section class="phead phead--about" id="top" data-locus data-labe
       {{cont}}
     </div>
     <div class="about__media" data-reveal style="--rd:1">
-      <div class="portrait"><img src="/assets/img/portrait-sq.jpg" srcset="/assets/img/portrait-sq-480.jpg 480w, /assets/img/portrait-sq.jpg 768w" sizes="(min-width: 1024px) 440px, 92vw" width="768" height="768" alt="John Jayasankar" fetchpriority="high" decoding="async"></div>
+      <div class="portrait"><img src="/assets/img/portrait-sq.jpg" srcset="/assets/img/portrait-sq-480.jpg 480w, /assets/img/portrait-sq.jpg 768w" sizes="(min-width: 1024px) 490px, 92vw" width="768" height="768" alt="John Jayasankar" fetchpriority="high" decoding="async"></div>
       <div class="edu" id="education"><span class="edu__logo">{{emark}}</span><div><h2 class="edu__school">{{school}}</h2><p class="edu__deg">{{degree}}</p><p class="edu__note">{{enote}}</p></div></div>
     </div>
   </div>
@@ -1021,15 +1048,14 @@ ABOUT_TPL = """<section class="phead phead--about" id="top" data-locus data-labe
     <div class="expgrid">{{exp}}</div>
   </div>
 </section>
-<section class="sect sect--tight" aria-label="Earlier roles, Labs and skills">
+<section class="sect sect--tight" aria-label="Labs and skills">
   <div class="wrap about__more">
-    <section class="panel earlier" id="earlier" data-locus data-label="Earlier" aria-labelledby="earlier-h" data-reveal><p class="panel__k">Before product</p><h2 class="panel__h" id="earlier-h">Earlier</h2><ul class="earlier__list">{{early}}</ul></section>
-    <section class="panel alabs" id="independent" data-locus data-label="Labs" aria-labelledby="alabs-h" data-reveal style="--rd:1"><p class="panel__k">{{alk}}</p><h2 class="panel__h" id="alabs-h">{{alh}}</h2><p class="panel__p">{{allede}}</p><ul class="alabs__list">{{alabs}}</ul><p class="panel__more">{{alink}}</p></section>
+    <section class="panel alabs" id="independent" data-locus data-label="Labs" aria-labelledby="alabs-h" data-reveal><p class="panel__k">{{alk}}</p><h2 class="panel__h" id="alabs-h">{{alh}}</h2><p class="panel__p">{{allede}}</p><ul class="alabs__list">{{alabs}}</ul><p class="panel__more">{{alink}}</p></section>
     <section class="panel skills" id="skills" data-locus data-label="Skills" aria-labelledby="skills-h" data-reveal style="--rd:2"><p class="panel__k">What I bring</p><h2 class="panel__h" id="skills-h">{{skk}}</h2><p class="panel__p">{{skl}}</p><div class="skills__cols">{{groups}}</div><p class="panel__more">{{sklinks}}</p></section>
   </div>
 </section>
-<section class="sect" id="institutional" data-locus data-label="Institutional context" aria-labelledby="inst-h">
-  <div class="wrap"><div class="inst" data-spot data-reveal><div class="inst__copy">{{instlabel}}<h2 class="inst__h" id="inst-h">{{insth}}</h2><p class="inst__p">{{instl}}</p></div><ul class="inst__grid">{{inst}}</ul></div></div>
+<section class="sect" id="plain-terms" data-locus data-label="Plain terms" aria-labelledby="terms-h">
+  <div class="wrap"><div class="inst" data-spot data-reveal><div class="inst__copy">{{instlabel}}<h2 class="inst__h" id="terms-h">{{insth}}</h2><p class="inst__p">{{instl}}</p></div><dl class="inst__grid">{{inst}}</dl></div></div>
 </section>
 """
 
@@ -1042,11 +1068,11 @@ def about():
         cases = ''.join('<li><a class="casechip" href="%s"><span class="casechip__n">%s</span><span class="casechip__m"><b>%s</b> %s</span></a></li>'
                         % (href, esc(name), mval(v), esc(k)) for name, href, v, k in e['cases'])
         roles = ''.join('<div class="role"><h4 class="role__t">%s</h4><p class="role__d">%s</p><ul class="ticks ticks--sm">%s</ul></div>'
-                        % (esc(t), esc(d), ''.join('<li>%s</li>' % esc(x) for x in items)) for t, d, items in e['roles'])
+                        % (esc(t), esc(d), ''.join('<li>%s</li>' % masked(esc(x)) for x in items)) for t, d, items in e['roles'])
         exp.append(('<article class="exp" id="%s" data-locus data-label="%s" aria-labelledby="%s-h" data-reveal%s>'
                     '<div class="exp__brand"><span class="exp__tile">%s</span><span class="exp__when"><span>%s to %s</span><span>%s</span></span></div>'
                     '<h3 class="exp__co" id="%s-h">%s</h3><p class="exp__parent">%s</p>'
-                    '<div class="exp__roles">%s</div><div class="exp__cases"><p class="exp__k">Selected cases from this role</p><ul>%s</ul></div></article>\n') % (
+                    '<div class="exp__roles">%s</div><div class="exp__cases"><p class="exp__k">Selected cases</p><ul>%s</ul></div></article>\n') % (
             e['id'], esc(e['company']), e['id'], rd(i), mark_span(e['logo'], 210, 34), esc(start), esc(end), esc(e['place']), e['id'], esc(e['company']),
             esc(e['parent']), roles, cases))
     early = []
@@ -1061,16 +1087,16 @@ def about():
     groups = ''.join('<div class="skills__g"><h3>%s</h3><ul class="chips">%s</ul></div>' % (esc(g), ''.join('<li>%s</li>' % esc(x) for x in items))
                      for g, items in Sk['groups'])
     E = A['edu']
-    I = A['institutional']
-    inst = ''.join('<li class="inst__item"><span class="mark" style="--m:url(/assets/img/vc-%s.svg);--ar:%.4f;--h:%gpx" aria-hidden="true"></span>'
-                   '<span class="inst__name">%s</span></li>' % (key, svg_ratio('assets/img/vc-%s.svg' % key), round(MARK_H[key] * 1.15, 1), esc(name))
-                   for key, name in P.MARKS)
-    body = render(ABOUT_TPL, label=slabel(None, A['kicker']), h1=esc(A['h1']),
-                  bio=''.join('<p>%s</p>' % esc(p) for p in A['bio']),
+    I = A['glossary']
+    inst = ''.join('<div class="inst__item"><dt class="inst__term">%s</dt><dd class="inst__name">%s</dd></div>' % (esc(term), esc(meaning))
+                   for term, meaning in I['terms'])
+    body = render(ABOUT_TPL, label=slabel(None, A['kicker']), h1=esc(A['h1']).replace('Lead Product Manager', '<span class="about__role">Lead Product Manager</span>'),
+                  bio=''.join('<p>%s</p>' % masked(esc(p)) for p in A['bio']),
                   acts=btn('Email me', 'mailto:' + EMAIL, 'primary', arrow=True) + btn('Résumé', RESUME, 'ghost') + btn('LinkedIn', P.SITE['linkedin'], 'ghost'),
                   mail=mail(), cont=CONTINUE, emark=mark_span(E['logo'], 96, 30), school=esc(E['school']), degree=esc(E['degree']),
                   enote=esc(E['note']), explabel=slabel('01', 'Experience'), path=mval(A['path']), hint=hint(A['hint']),
-                  exp=''.join(exp), early=''.join(early), alk=esc(AL['kicker']), alh=esc(AL['h2']), allede=esc(AL['lede']),
+                  exp=exp[0] + '<div class="expcol">' + exp[1] + ('<section class="panel earlier" id="earlier" data-locus data-label="Earlier" aria-labelledby="earlier-h" data-reveal>'
+                  '<p class="panel__k">Before product</p><h2 class="panel__h" id="earlier-h">Earlier</h2><ul class="earlier__list">%s</ul></section>' % ''.join(early)) + '</div>', alk=esc(AL['kicker']), alh=esc(AL['h2']), allede=esc(AL['lede']),
                   alabs=alabs, alink=tlink('The Labs page', '/labs'), skk=esc(Sk['kicker']), skl=esc(Sk['lede']), groups=groups,
                   sklinks='<span class="sep" aria-hidden="true">·</span>'.join(tlink(l, h) for l, h in Sk['links']),
                   instlabel=slabel('02', I['kicker'], dark=True), insth=esc(I['h2']), instl=esc(I['lede']), inst=inst)
@@ -1084,13 +1110,27 @@ def about():
 def writing():
     W = P.WRITING
     extra = '<div class="actions">%s</div>%s' % (btn(W['follow'], P.SITE['substack'], 'primary', 'lg'), CONTINUE)
-    body = (pagehead('Writing', W['kicker'], W['h1'], W['lede'], extra)
+    body = (pagehead('Writing', W['kicker'], W['h1'], W['lede'], extra, cls=' phead--writing')
             + ('<section class="sect sect--flush" aria-label="Theses"><div class="wrap">'
-               '<ol class="ncards ncards--page">%s</ol><div class="rows__foot">%s<button class="tbtn" type="button" data-copy-link>Copy link</button></div>'
-               '<p class="notes__foot">%s</p></div></section>\n') % (
-                note_cards('h2', page=True), hint(W['hint']), tlink(W['foot'], P.SITE['substack'])))
+               '<ol class="ncards ncards--page">%s</ol><div class="rows__foot"><p class="notes__foot">%s</p>%s'
+               '<button class="tbtn" type="button" data-copy-link>Copy link</button></div></div></section>\n') % (
+                note_cards('h2', page=True), tlink(W['foot'], P.SITE['substack']), hint(W['hint'])))
     title, desc = P.META['writing']
     return shell('writing', '/writing', title, desc, 'Writing', body)
+
+
+# ----------------------------------------------------------------------------
+# legal
+# ----------------------------------------------------------------------------
+def legal():
+    L = P.LEGAL
+    parts = ''.join('<section class="legal__part" aria-labelledby="legal-%d"><h2 class="legal__h" id="legal-%d">%s</h2>%s</section>'
+                    % (i, i, esc(h), ''.join('<p>%s</p>' % x for x in paras)) for i, (h, paras) in enumerate(L['parts'], 1))
+    body = (pagehead('Disclaimer', L['kicker'], L['h1'], L['lede'])
+            + '<section class="sect sect--flush" aria-label="Disclaimer"><div class="wrap"><div class="panel legal" data-reveal>%s</div></div></section>\n'
+            % parts)
+    title, desc = P.META['legal']
+    return shell('legal', '/legal', title, desc, 'Disclaimer', body)
 
 
 # ----------------------------------------------------------------------------
@@ -1124,10 +1164,10 @@ SIMPLE_TPL = """<body class="simple" data-label="Simple">
 <section id="selected-systems" class="container" data-sec data-label="Selected systems" aria-labelledby="sys-t"><h2 class="ctitle" id="sys-t"><a href="#selected-systems">selected systems</a></h2><ul class="cards">{{cards}}</ul></section>
 <section id="build" class="container" data-sec data-label="How I build" aria-labelledby="build-t"><h2 class="ctitle" id="build-t"><a href="#build">how I build</a></h2><p class="prose">{{build}}</p></section>
 <section id="writing" class="container" data-sec data-label="Featured writing" aria-labelledby="writing-t"><h2 class="ctitle" id="writing-t"><a href="#writing">featured writing</a></h2><p class="prose">{{writing}}</p><ul class="pubs">{{pubs}}</ul></section>
-<section id="pet-projects" class="container" data-sec data-label="Pet projects" aria-labelledby="pets-t"><h2 class="ctitle" id="pets-t"><a href="#pet-projects">pet projects</a></h2><p class="prose">{{pets_intro}}</p>{{pets}}</section>
+<section id="pet-projects" class="container" data-sec data-label="Independent products" aria-labelledby="pets-t"><h2 class="ctitle" id="pets-t"><a href="#pet-projects">independent products</a></h2><p class="prose">{{pets_intro}}</p>{{pets}}</section>
 <section id="outcomes" class="container" data-sec data-label="Selected outcomes" aria-labelledby="out-t"><h2 class="ctitle" id="out-t"><a href="#outcomes">selected outcomes</a></h2>{{outcomes}}</section>
-<section id="misc" class="container" data-sec data-label="Misc" aria-labelledby="misc-t"><h2 class="ctitle" id="misc-t"><a href="#misc">misc unsorted</a></h2><ul class="misc-list">{{misc}}</ul></section>
-<footer class="container sfoot"><span>{{foot}}</span><a href="#dhead" data-totop-link>Top <span aria-hidden="true">↑</span></a></footer>
+<section id="misc" class="container" data-sec data-label="Misc" aria-labelledby="misc-t"><h2 class="ctitle" id="misc-t"><a href="#misc">misc</a></h2><ul class="misc-list">{{misc}}</ul></section>
+<footer class="container sfoot"><span>{{foot}} · <a href="/legal">Disclaimer</a></span><a href="#dhead" data-totop-link>Top <span aria-hidden="true">↑</span></a></footer>
 </main>
 """
 
@@ -1148,7 +1188,7 @@ def simple():
                         '<div class="desc">%s</div></div>' % (esc(e['span']), e['logo'], esc(e['alt']), w, h,
                                                             ' loading="lazy"' if i > 2 else '', ''.join('<p>%s</p>' % x for x in e['html'])))
     cards = ''.join('<li class="card"><a href="/work/%s"><img src="%s" alt="" width="480" height="300" loading="lazy" decoding="async">'
-                    '<strong>%s</strong><span>%s</span></a></li>' % (slug, img_v('assets/img/work/%s.jpg' % slug), esc(name), esc(cap))
+                    '<strong>%s</strong><span>%s</span></a></li>' % (slug, thumb(BY[slug]), esc(name), esc(cap))
                     for slug, name, cap in S['systems'])
     pubs = ''.join('<li><a class="pub-title" href="%s">%s</a> · %s</li>' % (n['href'], esc(n['title']), esc(n['dek'])) for n in P.NOTES)
     pets = ''.join('<div class="project"><div class="pico"><a href="/work/%s" tabindex="-1" aria-hidden="true"><img src="%s" alt="" width="480" height="300" loading="lazy" decoding="async"></a></div>'
@@ -1158,6 +1198,7 @@ def simple():
     misc = ''.join('<li>%s</li>' % x for x in S['misc_html'])
     title, desc = P.META['simple']
     head = render(HEAD, page='simple', title=esc(title), desc=esc(desc), url=esc(DOM + '/simple'), robots='index, follow',
+                  canonical='<link rel="canonical" href="%s">' % esc(DOM + '/simple'),
                   theme='#ffffff', ogtype='profile', ogimg=esc(og_img()), ogalt=esc(P.SITE['og_alt']),
                   preload=PRELOAD, sheet='simple.css', v=V['scss'], ld=ld_block(person_ld()))
     body = render(SIMPLE_TPL, nsec='%02d' % len(S['sections']), tagline=esc(S['tagline']), icons=icons, email=EMAIL,
@@ -1196,7 +1237,7 @@ def data_js():
         systems=systems,
         notes=[dict(title=n['title'], tag=n['tag'], dek=n['dek'], href=n['href']) for n in P.NOTES],
         pages=[['Home', '/'], ['Work', '/work'], ['Labs', '/labs'], ['Approach', '/approach'], ['About', '/about'],
-               ['Writing', '/writing'], ['Simple', '/simple']],
+               ['Writing', '/writing'], ['Simple', '/simple'], ['Disclaimer', '/legal']],
         links=dict(email=EMAIL, linkedin=P.SITE['linkedin'], substack=P.SITE['substack'], resume=RESUME, labs=LABS_URL,
                    products=[[name, url] for name, url in P.PRODUCTS.values()]),
     )
@@ -1205,14 +1246,14 @@ def data_js():
 
 
 def sitemap():
-    paths = ['/', '/work', '/labs', '/approach', '/writing', '/about', '/simple'] + ['/work/' + s['slug'] for s in SYSTEMS]
+    paths = ['/', '/work', '/labs', '/approach', '/writing', '/about', '/simple', '/legal'] + ['/work/' + s['slug'] for s in SYSTEMS]
     urls = ''.join('  <url><loc>%s%s</loc><lastmod>%s</lastmod></url>\n' % (DOM, '' if p == '/' else p, LASTMOD) for p in paths)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + urls.replace('<loc>%s</loc>' % DOM, '<loc>%s/</loc>' % DOM) + '</urlset>\n')
 
 
 def robots():
-    return 'User-agent: *\nAllow: /\nDisallow: /research/\n\nSitemap: %s/sitemap.xml\n' % DOM
+    return 'User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n' % DOM
 
 
 # ----------------------------------------------------------------------------
@@ -1268,6 +1309,7 @@ def main():
     written.append(write('approach.html', approach()))
     written.append(write('about.html', about()))
     written.append(write('writing.html', writing()))
+    written.append(write('legal.html', legal()))
     written.append(write('simple.html', simple()))
     written.append(write('404.html', notfound()))
     written.append(write('sitemap.xml', sitemap()))

@@ -19,7 +19,7 @@ build step.
    output directory as the repository root. No environment variables.
 4. Deploy. Every push to the default branch redeploys.
 
-`vercel.json` supplies clean URLs (`/work/iport` serves `work/iport.html`),
+`vercel.json` supplies clean URLs (`/work/setup-agent` serves `work/setup-agent.html`),
 caching and security headers, including the Content-Security-Policy. It also
 pins the build settings: framework preset Other, no install step, no build step,
 and the repository root as the output directory. Those override the project's
@@ -56,7 +56,7 @@ Everything a visitor reads lives in four files:
 |---|---|
 | `tools/data_systems_a.py` | JJ-SYS-01 to 06: the Quantile systems. Case copy, metrics, bay titles and phases |
 | `tools/data_systems_b.py` | JJ-SYS-07 OpenGamma, then 08 to 11: RideLens, RailDrop, Daylight and Gridiron, including their Labs card copy |
-| `tools/data_pages.py` | home, labs, work, approach, about, writing, simple and 404 copy, including the home before and after rows; navigation, the Work menu groups and footer links; investor marks; the domain |
+| `tools/data_pages.py` | home, labs, work, approach, about, writing, simple and 404 copy, including the home before and after rows; navigation, the Work menu groups and footer links; the domains strip, glossary and disclaimer; the domain |
 | `tools/stories.py` | each system's story: what its schematic interface shows at every phase |
 | `tools/ideas.py` | the writing covers and the Approach principle drawings, in the same language |
 
@@ -90,7 +90,7 @@ assets/js/site.js             header and Work menu, reveal and count-up, showcas
                               bays and stories, thumbnails, palette, keys, facets, case beats
 assets/js/jj-data.js          generated palette index
 assets/fonts/                 Inter (variable), Newsreader italic (variable), IBM Plex Mono 400/500
-assets/img/                   portrait, logos, investor marks, favicon, og.jpg, work/ thumbnails
+assets/img/                   portrait, employer and school logos, favicon, og.jpg, work/ thumbnails
 John_Jayasankar_Resume.pdf
 tools/                        generator, data, stories, ideas, dev server, CDP driver      (not deployed)
 _stories.html _stories.js     story lab                                                     (not deployed)
@@ -162,7 +162,7 @@ python3 tools/stories_lab.py
 python3 tools/serve.py . 4401
 ```
 
-- `http://localhost:4401/_stories?only=iport&step=1` shows one story at one
+- `http://localhost:4401/_stories?only=setup-agent&step=1` shows one story at one
   phase in every frame size, from the case bay down to a 320px phone's cards
   (the Phone frames); `?auto=1` plays them all, and `?frames=Phone bay,Phone card`
   keeps only the frames named. Ideas are there too, at their card sizes:
@@ -200,7 +200,7 @@ ladder. The Simple page adds `f` for the full site.
 - **Motion.** The header floats into a pill after the first scroll. Blocks rise
   into place the first time they arrive and figures count up once. The home
   showcase advances on a timer that pauses on hover, focus, when off screen or in
-  a hidden tab. The investor marquee pauses on hover. One highlight glides
+  a hidden tab. The domains strip pauses on hover. One highlight glides
   between header links under a fine pointer, the dark panels carry a soft pointer
   light, stories cross-fade between phases (with the pointers, typing and
   counters inside them, and a named pointer where someone presses), and the before and after rows turn
@@ -208,11 +208,9 @@ ladder. The Simple page adds `f` for the full site.
   animating. Everything honours `prefers-reduced-motion`.
 - **Contrast.** Text tokens were measured: `--ink-2` is 7.3:1 and `--ink-3` 5.2:1
   on the ground. Tone halves of headings are only used at large sizes.
-- **Marks.** Investor marks (`assets/img/vc-*.svg`) and employer and school
-  logos (`assets/img/logo-*.svg`) are drawn through CSS masks in `currentColor`.
-  Investor optical heights are in `tools/build.py` (`MARK_H`), because their
-  aspect ratios run from about 1:1 to 12:1; `mark_span()` fits a logo to a box
-  from its aspect ratio.
+- **Marks.** Employer and school logos (`assets/img/logo-*.svg`) are drawn
+  through CSS masks in `currentColor`; `mark_span()` fits a logo to a box from
+  its aspect ratio. The investor logos were removed on 16 September 2026.
 
 ## Headers
 

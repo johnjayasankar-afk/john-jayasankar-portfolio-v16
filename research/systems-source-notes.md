@@ -54,7 +54,7 @@ as well as removing them. A visual that only deletes edges is wrong.
   **rebalancing portfolios with new market risk neutral trades** that reduce
   risk and release capital"
 - Same three-step Submit & Validate → Identify → Accept & Execute shape
-- "first to sweep risk into **LCH SwapAgent**… enables it to be held more
+- "first to sweep risk into **[the settlement service]**… enables it to be held more
   efficiently, provides greater access to **netting opportunities**"
 - Constraints are set on **risk, notional and resource metrics**
 
@@ -65,7 +65,7 @@ stated mechanism for risk preservation. The replacement trades should read as
 *neutral* (drawn cool, thin, non-directional) against the terminated gross
 exposure (drawn warm, heavy).
 
-**Safe to represent?** Yes. SwapAgent is already in John's own portfolio copy.
+**Safe to represent?** Yes. The settlement service is already in John's own portfolio copy.
 
 ---
 
@@ -88,11 +88,11 @@ participants** is the clearest possible proof it is not two-party netting.
 
 ---
 
-## 4. Quantile · FX Smart Clearing (Quantile × LCH ForexClear)
+## 4. Quantile · selective FX clearing (Quantile × an FX clearing house)
 
 **Key concepts**
-- "intelligently selecting existing **uncleared** trades to move to LCH
-  ForexClear, and optimising portfolios with **new rebalancing trades**"
+- "intelligently selecting existing **uncleared** trades to move to [the
+  clearing house], and optimising portfolios with **new rebalancing trades**"
 - Benefits of clearing: **multilateral netting**, lower counterparty risk
   weights, **settled to market (STM)** treatment
 - "Quantile's optimisation then ensures the risk reduction is achieved **within
@@ -104,13 +104,13 @@ participants** is the clearest possible proof it is not two-party netting.
 it is executable. The existing gate-corridor metaphor is already right; only the
 labelling needed to become more specific.
 
-**Note** · Smart Clearing is a *different* Quantile product from the ForexClear
+**Note** · Selective FX clearing is a *different* Quantile product from the clearing-house
 margin-API compression work in John's portfolio. Deliberately **not** merged
 into his claims.
 
 ---
 
-## 5. OpenGamma · Simulate / What-if  (opengamma.com/simulate)
+## 5. OpenGamma · pre-trade simulation  (opengamma.com/simulate)
 
 **Key concepts (verbatim public framing)**
 - "Simulate the impact of changes to your portfolio… **add, remove and edit
@@ -135,7 +135,7 @@ continuous optimisation that the product does not perform.
 
 ---
 
-## 6. OpenGamma · Explain (margin drivers)
+## 6. OpenGamma · margin drivers
 
 **Key concepts**
 - "Margin models provide **netting benefit between products and positions**, but
@@ -153,7 +153,7 @@ one glance: the bars differ only in their incremental portion.
 
 ---
 
-## 7. OpenGamma · Validate
+## 7. OpenGamma · statement validation
 
 **Key concepts**
 - "**independent** reconciliations… automatically downloads and normalises your
@@ -170,16 +170,16 @@ product output. No change required; the artifact already reads correctly.
 
 ---
 
-## 8. OpenGamma · Reduce, Forecast, Allocate
+## 8. OpenGamma · capital reduction, forecasting and allocation
 
-Read for category context. **Reduce** publicly cites "reduce capital
+Read for category context. **The capital reduction page** publicly cites "reduce capital
 requirements by up to 30%… for the same level of risk"; John's résumé
 independently states his simulator let clients identify allocations with up to
 30% lower initial margin for equivalent risk. These are **separate claims about
 different things** and were deliberately kept separate. No public metric was
 imported into John's copy.
 
-**Forecast/Allocate** · no artifact change justified.
+**Forecasting and allocation** · no artifact change justified.
 
 ---
 
@@ -199,12 +199,15 @@ imported into John's copy.
 - No vendor palette or brand identity imported.
 - No new capability, client, technology or metric attributed to John.
 - No inference of private architecture, algorithms or configurations.
-- Smart Clearing (a distinct product) not folded into John's FX work.
+- Selective FX clearing (a distinct product) not folded into John's FX work.
 
 
 ---
 
 # Appendix: the investor bar
+
+Removed from the site on 16 September 2026, at John's request, with the logo
+files. Kept here as a record of what it showed.
 
 The strip above the hero lists the institutional investors and owners behind the
 two companies John has worked at. These are **facts about the companies, not

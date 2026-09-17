@@ -4,11 +4,13 @@
     python3 tools/stories_lab.py
 
 _stories.html  every story at the sizes the site shows it, at one step or playing:
-               /_stories?only=iport&step=1   /_stories?auto=1
+               /_stories?only=setup-agent&step=1   /_stories?auto=1
 _thumbs.html   each story at rest in an 800x500 frame, for assets/img/work/*.jpg
-_og.html       the 1200x630 link-preview card (assets/img/og.jpg)"""
+_og.html       the 1200x630 link-preview card (assets/img/og.jpg)
+_og_cases.html one 1200x630 link-preview card per case (assets/img/og/<slug>.jpg)"""
 
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -17,6 +19,8 @@ sys.path.insert(0, HERE)
 
 import stories  # noqa: E402
 import ideas  # noqa: E402
+from data_systems_a import SYSTEMS_A  # noqa: E402
+from data_systems_b import SYSTEMS_B  # noqa: E402
 
 # the writing covers and the principle drawings, at their card sizes
 IDEA_FRAMES = dict(note=[('Note cover', 410, '5 / 4'), ('Note mobile', 338, '16 / 10'), ('Note phone', 280, '16 / 10')],
@@ -107,13 +111,13 @@ body { width: 1200px; height: 630px; }
     <p class="og__career">Quantile (LSEG) · OpenGamma · Wells Fargo</p>
     <div class="og__proof">
       <p><b>3.5h → 8m</b><span>expert setup, now an agent</span></p>
-      <p><b>3×</b><span>run volume, same headcount</span></p>
-      <p><b>$3M+</b><span>new and expansion ARR</span></p>
-      <p><b>$6.5T</b><span>eligible notional unlocked</span></p>
+      <p><b>750+</b><span>senior eng hours returned a year</span></p>
+      <p><b>+34%</b><span>notional reduction per run</span></p>
+      <p><b>100%</b><span>acceptance, 40+ live runs</span></p>
     </div>
   </div>
   <div class="og__stage">
-    <p class="og__head"><span>Agents + markets · one control model</span><span>Hours → minutes</span></p>
+    <p class="og__head"><span>Agents + markets · Quantile systems</span><span>Hours → minutes</span></p>
     {{body}}
   </div>
   <p class="og__dom">johnjayasankar.com</p>
@@ -121,6 +125,32 @@ body { width: 1200px; height: 630px; }
 </body>
 </html>
 """
+
+
+OG_CASE_CSS = """
+.og__kicker { align-self: flex-start; }
+.og__title { margin-top: 24px; font: 450 42px/1.06 var(--sans); letter-spacing: -.045em; color: var(--ink); text-wrap: balance; }
+.og__meta { margin-top: 16px; font: 500 14px/1.4 var(--sans); color: var(--ink-3); }
+.og__proof--case { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.og__head--case span:first-child { max-width: 70%; }
+.og-case + .og-case { margin-top: 0; }
+"""
+
+
+def og_case(s):
+    """One link-preview card for a case: its title, context and first two figures beside its story at rest."""
+    esc = stories.esc
+    meta = ' · '.join(x for x in (s['org'], s['year'], s['role']) if x)
+    proof = ''.join('<p><b>%s</b><span>%s</span></p>' % (esc(v), esc(k)) for v, k in s['metrics'][:2])
+    b = s['bay']
+    return ('<div class="og og-case" id="og-%s">'
+            '<div class="og__stripes stripes"><i></i><i></i><i></i><i></i></div>'
+            '<div class="og__copy"><p class="badge og__badge og__kicker"><span class="badge__dot"></span>%s · %s</p>'
+            '<p class="og__title">%s</p><p class="og__meta">%s</p><div class="og__proof og__proof--case">%s</div></div>'
+            '<div class="og__stage"><p class="og__head og__head--case"><span>%s</span><span>%s</span></p>%s</div>'
+            '<p class="og__dom">johnjayasankar.com/work/%s</p></div>') % (
+        s['slug'], esc(s['id']), esc(s['kind']), re.sub(r'(\d+(?:\.\d+)?-[a-z]+)', r'<span style="white-space: nowrap">\1</span>', esc(s['title'])), esc(meta), proof,
+        esc(b['title']), esc(b['big']), stories.render(s['slug']), s['slug'])
 
 
 def write(name, text):
@@ -142,7 +172,9 @@ def main():
     write('_thumbs.html', THUMBS.replace('{{body}}', '\n'.join('<div class="th" id="th-%s">%s</div>' % (k, stories.render(k))
                                                                 for k in stories.STORIES)))
     write('_og.html', OG.replace('{{body}}', stories.render('hero')))
-    print('wrote _stories.html, _thumbs.html and _og.html for %d stories' % len(stories.STORIES))
+    cases = OG.split('<body>')[0].replace('</style>', OG_CASE_CSS + '</style>').replace('html, body { margin: 0; overflow: hidden; }', 'html, body { margin: 0; }').replace('body { width: 1200px; height: 630px; }', 'body { width: 1200px; }')
+    write('_og_cases.html', cases + '<body>\n' + '\n'.join(og_case(s) for s in SYSTEMS_A + SYSTEMS_B) + '\n</body>\n</html>\n')
+    print('wrote _stories.html, _thumbs.html, _og.html and _og_cases.html for %d stories' % len(stories.STORIES))
 
 
 if __name__ == '__main__':

@@ -42,18 +42,18 @@ Source: first-party product page (supplied), grade A.
 IMM** by analysing the risk of transactions between participants and
 **rebalancing portfolios with new market risk neutral trades**."
 Proposal = "a set of **new market risk neutral trades**." Risk was "the first to
-sweep risk into **LCH SwapAgent**." Constraints: "risk, notional and resource
+sweep risk into **[the settlement service]**." Constraints: "risk, notional and resource
 metric constraints."
 
 INVARIANT: market-risk neutrality.
 WHAT MOVES: counterparty exposure distribution, IM, capital.
 Note: compression REMOVES notional; this ADDS trades. Opposite gestures.
 
-## S3 · Quantile / LCH — FX Smart Clearing
+## S3 · Quantile / clearing house — selective FX clearing
 Source: first-party product page (supplied), grade A.
 
-"**selectively clear** FX Forwards via LCH ForexClear." Works by "intelligently
-selecting **existing uncleared trades to move to LCH ForexClear**, and
+"**selectively clear** FX Forwards via [the clearing house]." Works by "intelligently
+selecting **existing uncleared trades to move to [the clearing house]**, and
 optimising portfolios with **new rebalancing trades**." Customisable by
 "preferred **currency pairs and trading partners**." Portfolios "can also
 potentially be compressed." Driver: "**SA-CCR** has increased capital
@@ -66,7 +66,7 @@ WHAT MOVES: which side of the cleared/uncleared boundary a trade sits on.
 Visual primitives: a clearing boundary, selection, migration, residual bilateral
 book, rebalancing trades.
 
-## S4 · OpenGamma — Simulate (pre-trade what-if margin)
+## S4 · OpenGamma — pre-trade margin simulation
 Sources: first-party product page + first-party API documentation, grade A.
 
 API objects, exact names: `additionalBasePortfolio`, `incrementalPortfolio`,
@@ -88,18 +88,18 @@ Product page: model position changes (add / remove / edit), "find the cheapest
 option across exchanges and brokers", "maximise your available trading
 capacity", and "Initial Margin limits can be a constraining factor for firms to
 put on new trades."
-Methodologies listed: SPAN, CME SPAN2, ICE SPAN/IRM2, JSCC, EUREX, ISDA SIMM.
+Methodologies listed: the major exchange and industry initial margin models.
 
 INVARIANT: the base portfolio and the scenario assumptions, held constant so
 alternatives are comparable.
 WHAT MOVES: where the hypothetical trade is allocated, and the resulting margin
 and headroom.
 
-## S5 · Internal products (I-Port, QT CoCo)
+## S5 · Internal products (setup agent, incident agent)
 No public first-party imagery exists and none was sought beyond John's own
 case-study copy. Modelled only from the portfolio's existing description:
 run context, bounded judgment, typed actions, human approval, parallel capacity;
-and for CoCo, two MCP evidence surfaces resolving to a root cause.
+and for the incident agent, two MCP evidence surfaces resolving to a root cause.
 Employer work stays intentionally generalised: no client data, no internal
 architecture, no production configuration.
 
@@ -115,7 +115,7 @@ being scored zero.
   branding, palette or wordmark inside any artifact.
 - No invented counterparties, trade identifiers, notionals or margin figures.
   Labels stay schematic (PARTICIPANT A, VENUE 01).
-- No claim that John's FX work used every published Smart Clearing capability.
+- No claim that John's FX work used every published selective-clearing capability.
   The public product supplies the domain model only.
 - Compression and counterparty-risk optimisation are kept visually distinct
   because they are different services with opposite primary gestures.
@@ -124,7 +124,7 @@ being scored zero.
 
 ## What this research actually changed
 
-**Card 07 · Pre-Trade Margin Simulator.** The published what-if API documents
+**Card 07 · Pre-Trade Margin Simulator.** The published simulation API documents
 `standaloneMargin` next to `incrementalMargin`. The scene previously showed only
 baseline + incremental per venue. It now reveals, on hover, the standalone cost
 of the same trade with no portfolio behind it, with a caliper marking the gap.
@@ -138,10 +138,10 @@ surfaces was drawn identically. Run state is now a tick (a sample at an instant)
 and the support corpus a bar (written material), and the scene counts what it
 kept against what it set aside, so triage is visible as triage.
 
-**Card 06 · a correction, recorded deliberately.** Research into FX Smart
-Clearing led me to rebuild this artifact around selectively moving uncleared FX
-forwards to a CCP. That was wrong. Smart Clearing is the *vendor's* product
-story; John's scope on this card is the ForexClear margin API embedded in the
+**Card 06 · a correction, recorded deliberately.** Research into selective FX
+clearing led me to rebuild this artifact around selectively moving uncleared FX
+forwards to a CCP. That was wrong. Selective clearing is the *vendor's* product
+story; John's scope on this card is the clearing house's margin API embedded in the
 optimiser behind a four-source validation layer, and his metrics are proposal
 acceptance and live-run failure rate. Rebuilding around the public product would
 have quietly attributed a capability to him that his own copy does not claim.
@@ -261,7 +261,7 @@ the bilateral baseline was nowhere in the picture. A tick on the gross-notional
 bar now marks where two-party netting stops, so the claimed gap is the gap you
 can see. Ratio held honestly: .72 / .537 = 1.34.
 
-**Approach · AI Platform & Controls (`stack`).** The layers were generic
+**Approach · Agent Platform & Controls (`stack`).** The layers were generic
 (WORKFLOW / CONTEXT / TOOLS / ACTIONS…) where the case names its components
 exactly. They now read MCP SERVERS, DOMAIN APIS, TYPED ACTIONS, HUMAN APPROVAL,
 DETERMINISTIC, EVALS & QA. More importantly the claim is not that a stack
@@ -270,7 +270,7 @@ systems** — so five systems now enter the same stack at its base.
 
 **Card 06 (`lattice`) and Card 07 (`capital`)** were reviewed and left as they
 are. The FX validation corridor already matches John's scope exactly, and the
-what-if allocation scene remains the most closely researched artifact on the
+simulated allocation scene remains the most closely researched artifact on the
 site. Both gained their markers back from the `dot` fix.
 
 Every card caption and every `aria-label` was rewritten to describe what its

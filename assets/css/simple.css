@@ -84,6 +84,8 @@ hr { max-width: 1120px; height: 1px; margin: 28px auto; border: 0; background: v
 .ctitle a { color: var(--ink); text-decoration: none; }
 .ctitle a:hover { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 6px; }
 .prose { font-size: 16.5px; line-height: 1.65; color: var(--ink-2); }
+#dico .ico--ext { display: none; }
+.tagline { text-wrap: balance; }
 
 #selected-systems { max-width: none; margin-top: 48px; padding-block: 8px 38px; background: var(--band); }
 #selected-systems > * { max-width: 1040px; margin-inline: auto; }

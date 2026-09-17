@@ -35,6 +35,14 @@ def load_rules():
     return rules
 
 
+def load_redirects():
+    try:
+        cfg = json.load(open(os.path.join(ROOT, 'vercel.json')))
+    except Exception:
+        return {}
+    return {r['source']: (r['destination'], 308 if r.get('permanent', True) else 307) for r in cfg.get('redirects', [])}
+
+
 class H(http.server.BaseHTTPRequestHandler):
     server_version = 'jj-local'
 
@@ -60,6 +68,12 @@ class H(http.server.BaseHTTPRequestHandler):
         # trailingSlash:false and cleanUrls both redirect rather than serve twice
         if len(path) > 1 and path.endswith('/'):
             return self._redirect(path.rstrip('/'), u.query)
+        hop = load_redirects().get(path)   # re-read, like the headers
+        if hop:
+            self.send_response(hop[1])
+            self.send_header('Location', hop[0])
+            self.end_headers()
+            return
         if path.endswith('.html') and path != '/404.html':
             clean = path[:-5]
             if clean.endswith('/index'):
