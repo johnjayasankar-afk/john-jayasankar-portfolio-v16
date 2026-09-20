@@ -5,6 +5,93 @@ was actually verified, what is still open, and where the next cycle should look.
 
 ---
 
+## Cycle 17 - 2026-09-19 · Signature interactions
+
+**Why this.** John asked for a full inspection, adding whatever would make the site
+feel more high-tech and polished, in the current theme. The layout held up at 1440,
+1280, 1024, 768 and 390, so this cycle adds interactions rather than moving things.
+No copy, names or figures changed.
+
+### Shipped (both sites unless noted)
+
+1. **A case's diagram carries into its page (portfolio).**
+   - Clicking a case from a home card, a Work row, the Labs band, the Labs page, the
+     next-case card or the Work menu makes that card's diagram fly into the case
+     header's diagram as the page changes.
+   - From the ledger rows and the About case chips, the hover preview flies in
+     instead.
+   - How it works: cross-document view transitions. `pageswap` names the source
+     `jj-art`, and `.casebay .story` carries the same name at 1025px and above.
+   - A case page's own diagram steps aside (`none`) when it isn't what carries over,
+     or when it is off screen.
+2. **Page changes.**
+   - The header (`jj-hdr`) holds still and morphs between its floating and full
+     states.
+   - The old page fades out in 220ms, and the new one rises in over 500ms.
+   - Turned off with reduced motion.
+3. **Cards catch the light.**
+   - A thin ring follows the pointer around each card's edge, with a soft glow on
+     the card behind its content (`.edge`).
+   - Mint on light and dark cards, and forest on the mint rule cards.
+4. **Hover previews (portfolio).** The home ledger rows and the About case chips
+   show the case diagram beside the pointer (`[data-peek]`). The preview flips left
+   near the right edge.
+5. **Section rail (1380px and up).** A glass rail of the page's sections, with the
+   current one marked and a label on hover. Home, About, Approach and Labs have
+   one; case pages keep their own contents list.
+6. **Case contents (portfolio).** One plate with a mint accent glides to the current
+   section.
+7. **Other touches.**
+   - The back-to-top button fills a mint ring as the page is read.
+   - Once after load, a band of light runs along the hero's quieter line.
+   - The main buttons lean up to 5px toward the pointer.
+   - The footer's big word rises into place when it arrives.
+   - Scrollbars take the site's color.
+   - A signature line in the browser console.
+8. **Repository hygiene.**
+   - Removed the committed `tools 2/` duplicate of the site, which was being served
+     publicly.
+   - Restored `.gitignore` and `.vercelignore`, which Finder had dropped, so
+     `tools/`, `research/` and the notes stop being served.
+   - Untracked `.DS_Store`.
+
+### Verified
+
+- Both builds clean. 96 page loads (every page of both sites at 1440, 1024, 768 and
+  390) with no console errors besides the 404 page's own 404, and no horizontal
+  overflow.
+- Reduced motion is clean.
+- The largest paint on home is unchanged: 160 to 280ms on desktop, about 130ms on a
+  phone. It is still the hero line.
+- Transitions, checked with a `pagereveal` probe on the local server with production
+  caching: 16 of 16 navigations ran a transition, and the diagram carried in all 8
+  case navigations, both sides.
+- The frame-by-frame screencast shows no blank frame.
+- Pointer effects driven with real mouse input in headless Chrome.
+- Link-preview and thumbnail images re-rendered for comparison and matched, so none
+  were replaced.
+
+### Not verified
+
+- Safari (cross-document transitions need 18.2+), Firefox (no cross-document
+  transitions, so a normal page change) and a physical phone.
+
+### Notes for the next cycle
+
+- The local `serve.py` sends `no-store`. With it, Chrome sometimes skips a
+  cross-document transition with "opt-in disabled", apparently because it checks
+  the new page before the re-fetched stylesheet applies. With production caching
+  it never happened.
+- Test transitions with production-style cache headers.
+- `Page.captureScreenshot` hangs during a cross-document transition. Use
+  `Page.startScreencast` frames instead.
+- Liquid glass on the floating chrome was prototyped and previewed on 2026-09-19:
+  an SVG lens in `backdrop-filter` for Chromium, frosted fallback elsewhere, and a
+  header that turns to dark glass over the dark bands. It is not in this build;
+  John has the preview and the decision.
+
+---
+
 ## Cycle 16 - 2026-09-17 · Polish: light, line breaks, phones
 
 **Why this.** John asked for one more pass on visual polish, keeping the animations,

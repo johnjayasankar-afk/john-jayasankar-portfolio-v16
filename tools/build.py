@@ -306,7 +306,7 @@ FOOTER = """<footer class="ftr">
 </footer>
 """
 
-TOTOP = '<button class="totop" type="button" data-totop aria-label="Back to top">%s</button>\n' % UP
+TOTOP = '<button class="totop" type="button" data-totop aria-label="Back to top">%s<svg class="totop__ring" viewBox="0 0 46 46" aria-hidden="true" focusable="false"><circle cx="23" cy="23" r="22" pathLength="100"/></svg></button>\n' % UP
 
 OVERLAYS = TOTOP + """<div class="toast" role="status" aria-live="polite" data-toast></div>
 <div class="gchip" data-gchip hidden><p data-gchip-text></p><button type="button" data-gchip-close>Got it</button></div>
@@ -649,9 +649,9 @@ def home():
     for slug in L['slugs']:
         s = BY[slug]
         kind, v, unit = s['ledger']
-        rows.append('<li><a class="lrow" href="/work/%s"><span class="lrow__id">%s</span><span class="lrow__name">%s</span>'
+        rows.append('<li><a class="lrow" href="/work/%s" data-peek="%s"><span class="lrow__id">%s</span><span class="lrow__name">%s</span>'
                     '<span class="lrow__kind">%s</span><span class="lrow__m"><b>%s</b> %s</span><span class="lrow__go">%s</span></a></li>'
-                    % (slug, s['id'], esc(s['name']), esc(kind), mval(v), esc(unit), ARROW))
+                    % (slug, thumb(s), s['id'], esc(s['name']), esc(kind), mval(v), esc(unit), ARROW))
     featured = ('<section class="sect" id="featured" data-locus data-label="Selected work" aria-labelledby="featured-h"><div class="wrap">'
                 '%s<div class="fgrid">%s</div>'
                 '<div class="ledger" id="ledger" data-locus data-label="Also shipped" data-reveal>'
@@ -1042,7 +1042,7 @@ ABOUT_TPL = """<section class="phead phead--about" id="top" data-locus data-labe
     </div>
   </div>
 </section>
-<section class="sect" id="experience" aria-labelledby="exp-h">
+<section class="sect" id="experience" data-rail data-label="Experience" aria-labelledby="exp-h">
   <div class="wrap">
     <div class="shead shead--split" data-reveal><div>{{explabel}}<h2 class="h2" id="exp-h">{{path}}</h2></div><div class="shead__aside">{{hint}}</div></div>
     <div class="expgrid">{{exp}}</div>
@@ -1065,8 +1065,8 @@ def about():
     exp = []
     for i, e in enumerate(A['experience']):
         start, end = e['roles'][-1][1].split(' to ')[0], e['roles'][0][1].split(' to ')[-1]
-        cases = ''.join('<li><a class="casechip" href="%s"><span class="casechip__n">%s</span><span class="casechip__m"><b>%s</b> %s</span></a></li>'
-                        % (href, esc(name), mval(v), esc(k)) for name, href, v, k in e['cases'])
+        cases = ''.join('<li><a class="casechip" href="%s" data-peek="%s"><span class="casechip__n">%s</span><span class="casechip__m"><b>%s</b> %s</span></a></li>'
+                        % (href, thumb(BY[href.rsplit('/', 1)[-1]]), esc(name), mval(v), esc(k)) for name, href, v, k in e['cases'])
         roles = ''.join('<div class="role"><h4 class="role__t">%s</h4><p class="role__d">%s</p><ul class="ticks ticks--sm">%s</ul></div>'
                         % (esc(t), esc(d), ''.join('<li>%s</li>' % masked(esc(x)) for x in items)) for t, d, items in e['roles'])
         exp.append(('<article class="exp" id="%s" data-locus data-label="%s" aria-labelledby="%s-h" data-reveal%s>'
