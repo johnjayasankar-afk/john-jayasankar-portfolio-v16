@@ -5,6 +5,321 @@ was actually verified, what is still open, and where the next cycle should look.
 
 ---
 
+## Cycle 21 - 2026-09-25 · Three cycles that never shipped, and the first paint
+
+**Why this.** John asked for another pass over both sites. The first thing the pass
+found was that the repos were three cycles behind what had been built: the liquid
+glass, the word cascade and the whole production pass existed only in the zips from
+20 September. Recovering that came before anything new.
+
+### Shipped
+
+1. **Cycles 18, 19 and 20 are in the repos now.**
+   - The committed repos were at cycle 17. `Portfolio.zip` and `Labs.zip` from
+     20 September were a clean superset of them: every tracked file except
+     `.DS_Store`, plus twenty more (the dotfiles, `site.webmanifest`, `llms.txt`,
+     `.well-known/security.txt`, the two icons and fourteen WebP images).
+   - Verified before applying and after: of the 87 shared files, 61 were byte
+     identical and the 26 that differed are exactly the ones those cycles touch.
+     Rebuilding from `tools/build.py` reproduces the delivered build exactly, the
+     only difference being the date stamps, which come from the build date.
+
+2. **Three things the live sites were serving that they should not.**
+   - `tools 2/`, a complete duplicate of the site left by a Finder copy, was tracked:
+     87 files, and `/tools%202/about` answered 200 in this pass.
+   - Neither repo had `.gitignore` or `.vercelignore`, so `/tools/build.py` (82 kB of
+     source), `/IMPROVEMENTS.md` (76 kB) and `/_stories` (1.4 MB) were all public.
+     Both were confirmed 200 on the live sites before the fix.
+   - `.DS_Store` was tracked in both.
+
+3. **The home pages painted about twice as fast.** Everything they need was already
+   in hand at 183ms and neither painted until about 550. The difference was work
+   done before the first paint that did not have to be.
+   - **The glass lenses are built after the first paint**, a few milliseconds at a
+     time. Each one draws a displacement map pixel by pixel and reads it back as a
+     data URL; building them all inline was 169ms of the 363ms the portfolio spent
+     before painting. Glass stays frosted until its lens lands, which is what a
+     browser without the filter shows anyway.
+   - **The segmented indicators are placed after the first paint.** Each is measured
+     from its selected button's `offsetLeft` and `offsetWidth`, which forces a
+     layout, and doing that for every control before anything was drawn cost 100ms.
+     They only animate once their control has `is-ready`, a frame later regardless.
+   - **Headings are all measured, then all split.** The splitter rewrote a heading's
+     children and then asked that heading where it was, once per heading, which
+     makes the browser lay out the page again each time.
+
+4. **Gridiron's figures on both sites were out of date**, which matters more than
+   the rest of this list because they are claims. It now reads 634 unit and
+   integration tests and 147 end-to-end journeys at version 0.6.0, against 446 and
+   60 at 0.5.1. The "not claimed" list said in-game line movement had not been
+   observed; it has been since, so that line now says what is actually true, which
+   is that the sportsbook reports an opening line and a latest one and nothing
+   between. The field grid gains the venue work: the stands are built from the real
+   capacity where one is published, 366 grounds of them.
+
+### Verified
+
+- **Every page of both sites, 21 in all**: no console error, no failed request, no
+  horizontal overflow, exactly one `h1`, every image with alt text. Twice, before and
+  after the changes.
+- **First paint, headless Chrome, five runs each measured back to back**: the Labs
+  home page reads a median of 136ms with the heading fix and 288ms without it. The
+  portfolio home went from 592ms to a 204 to 296ms band across four runs.
+- The rendered pages, the glass, the segmented indicators and the heading cascade
+  were captured at 1440, 1024, 768 and 390, under reduced motion, and compared with
+  captures taken before the work. Nothing moved.
+
+### Still open
+
+- The absolute first-paint numbers swing by 100ms or more between runs on this
+  machine. The back-to-back A/B is the trustworthy part; the single figures are not.
+- The other seven Labs products carry their own figures on both sites. Only
+  Gridiron's were checked against its repo in this pass.
+
+---
+
+## Cycle 20 - 2026-09-20 · Production readiness
+
+**Why this.** The visual work was done; this pass asked what a production site is
+still missing. Most of the answer turned out to be "nothing": contrast, target size,
+heading order, landmarks, alt text, image dimensions, no-JS rendering, CSP, HSTS and
+caching were already clean when measured. What follows is what measurement actually
+found.
+
+### Shipped (both sites)
+
+1. **A case study prints as a document.** The print stylesheet now hides the screen
+   controls (copy buttons, phase hints, the next-case card, footer navigation), flattens
+   glass to a hairline, turns the dark panels into ink on white, drops the watermark
+   words, sets a 16mm page, keeps headings with their text, and prints the URL after
+   every outside link. Verified by printing to PDF: a case runs five pages with the
+   diagram intact, About prints with the LinkedIn URL and the email address in place.
+   It also fixed a real defect: words in a heading that had not yet arrived printed at
+   6% opacity.
+2. **Forced colours.** When Windows replaces every colour, a rim drawn with box-shadow
+   disappears and cards run together. Cards, controls and panels now take a real border,
+   focus takes Highlight, translucent surfaces become opaque, and the diagrams keep the
+   colours they were drawn with.
+3. **prefers-contrast: more.** Darker ink (`--ink-2` #48524c to #333d37), firmer lines
+   (.09 to .2), and glass closer to solid.
+4. **colour-scheme: light**, so a browser in dark mode stops recolouring form controls
+   and scrollbars against a light page.
+5. **Dates that are true.** `LASTMOD` came from a constant frozen at 2026-09-16 while
+   the footer claimed a later month. It now comes from the build, and `LASTMOD=` in the
+   environment pins it for a rebuild that changes nothing.
+6. **Structured data that matches the page.** A case's TechArticle carried the site's
+   generic preview card while its meta tags carried its own; both now carry its own.
+   /about is a ProfilePage around the Person, /work and /labs are ItemLists of every
+   case, and the home page adds the WebSite entity.
+7. **WebP beside every photograph a visitor downloads**, with the JPEG kept as the
+   fallback so nothing regresses. /simple went from 437K of images to 152K, the About
+   portrait from 67K to 31K, the next-case card from 39K to 15K. The JPEGs are untouched.
+8. **A manifest, llms.txt and .well-known/security.txt.** Icons at 192 and 512, rendered
+   from the favicon, maskable because the orb already sits inside the safe circle.
+9. **The mono face is preloaded**, because it renders in the first screen (the badge
+   clock, the section numbers, every label) and was swapping in late.
+
+### Verified
+
+- 56 page loads across both sites at 1440, 1024, 768 and 390: no console errors, no
+  horizontal overflow.
+- Rendered text identical to the published build on all 19 pages.
+- Thumbnails and all twelve link-preview cards render pixel for pixel as they do now.
+- Accessibility measured rather than assumed: zero contrast failures, and every target
+  under 24px passes the WCAG 2.2 spacing exception, on 11 page loads including mobile.
+- Four media modes checked under emulation: normal, forced colours, more contrast,
+  reduced transparency. Each does what it should.
+- Frame cost with vsync and the frame limiter off: median 3.5 to 4.9ms, p95 7.1 to
+  9.5ms, against the 16.7ms a 60fps frame allows.
+- Cross-document view transitions still run on all four routes tested.
+
+### Open
+
+1. **Font subsetting was not attempted**: fontTools is not installed here, and guessing
+   a glyph set would risk a missing character in production. Inter is 47K and the two
+   mono faces 29K; a subset could roughly halve that.
+2. **The CSS and JS are served unminified** (191K and 88K, about 37K and 24K over the
+   wire compressed). Minifying would save under 10K compressed, at the cost of a
+   stylesheet nobody can read.
+3. **The mega menu and hover previews still load JPEG**, because they defer loading
+   through a data-src attribute that a `<picture>` source would bypass.
+
+---
+
+## Cycle 19 - 2026-09-20 · The finish pass
+
+**Why this.** John asked for the sites to feel more visually impressive, sleeker and
+more finished, on the same theme and fonts. Nothing here is a new component. It is
+the last layer: how motion is paced, how a rule ends, how long a line of text runs,
+and how figures line up.
+
+### Shipped (both sites)
+
+1. **Headings arrive one word after another.** A section heading splits into word
+   spans on the client and each rises in sequence, 30ms apart, driven by the block's
+   existing arrival class. The split keeps an arrow glued to the figures around it,
+   so "0 to 1" can never break across a line, and it steps over screen-reader text.
+   A heading already on screen plays as a load animation instead, starting at opacity
+   .12 so it still counts as the page's main content. Under reduced motion no split
+   happens at all. Rendered text is byte-identical to the published build on all 16
+   pages.
+2. **Lighter, quicker arrival.** Blocks rise 16px in .62s with a 70ms stagger, rather
+   than 26px in .9s with 90ms, and the entry blur drops from 6px to 3px. Grids now set
+   their own stagger, so cards in a row arrive one after another. The hero sequence
+   was tightened to match.
+3. **Rules fade at their ends.** The rule between case beats, between Labs product
+   blocks and above the footer base is a gradient hairline through `border-image`, so
+   it no longer stops dead against the page.
+4. **A measure, set by measurement.** A cap in `ch` runs about a third longer than it
+   reads, because a "0" is wider than the average letter: the 62ch ledes were running
+   80 to 92 characters a line. Case paragraphs now cap at 56ch (62 to 73 characters
+   measured at 1440px) and the ledes at 54ch.
+5. **Depth on scroll.** The hero's light drifts 34px slower than the page and its dark
+   stage 16px against it, set as two custom properties from the existing scroll frame.
+6. **Small finishes.** A soft light on the reading bar; tabular numerals on the
+   remaining figures and section numbers; every card lifts by the same 3px; a third,
+   softer layer in the deepest shadow.
+
+### Verified
+
+- **Frame cost, measured with vsync and the frame limiter off**, A/B in the same
+  browser run by stripping the cascade at runtime: home 3.6 to 4.2ms median either
+  way, case page 2.2 to 2.3ms either way, against the 16.7ms a 60fps frame allows.
+  The already published build measures 3.6 to 5.1ms median in the same harness, so
+  this build is no slower than what is live.
+- Rendered text identical to the published build on all 16 pages (only the live clock
+  differs). No console errors and no horizontal overflow at 1440, 1024, 768 and 390.
+- Thumbnails, the link preview card and all 11 case preview cards render pixel for
+  pixel as they do in the published build, so no image needs re-rendering.
+- Cross-document view transitions still run: the header holds, the case diagram
+  carries across, each completes.
+- Reduced motion leaves headings unsplit and the parallax off. The palette tokens and
+  all three font faces are byte-identical to the published build; the only `:root`
+  change is the third shadow layer.
+
+### Open
+
+1. **LCP on interior pages measured 138 to 176ms against 78 to 150ms for the published
+   build.** Both are far inside any threshold and the element is unchanged, but the
+   gap is consistent enough to be the glass lenses building at load. Worth a look if
+   the sites ever feel slow on a cold visit.
+2. **Case beat headings are still unsplit.** They sit outside any arrival block, so a
+   cascade there would need its own observer, and half-animating a beat (heading moves,
+   paragraph does not) would read worse than leaving it still.
+
+---
+
+## Cycle 18 - 2026-09-19 · Liquid glass
+
+**Why this.** John asked for liquid glass across both sites, as close to Apple's
+material and to liquid-glass.ybouane.com as the web allows. That library was ruled
+out first: it captures the DOM into WebGL through html-to-image, re-captures
+anything animated every frame, needs each glass element to be a direct child of one
+root, opens a WebGL context per instance, and loads from a CDN the sites' CSP
+blocks. This is the same look built natively, at no measured cost.
+
+### Shipped (both sites)
+
+1. **One material, three tints.** `.gl` carries the tint, the frost, a rim of light
+   (bright top left, softer bottom right, hairline all round) and a drop shadow.
+   `.gl--dark` is the dark tint, `.gl--clear` the clear one, `.gl--spec` adds a
+   highlight that follows the pointer.
+2. **Real refraction in Chromium.** For each surface a rounded-rectangle lens map is
+   drawn to a canvas, wired into an SVG filter (`feImage` plus three
+   `feDisplacementMap` passes, one per channel for a hint of colour at the rim) and
+   set as `backdrop-filter`. Safari and Firefox keep frosted glass; both get the rim.
+3. **Applied to:** the header bar, the case section bar, the Work menu, the phone
+   drawer, the command palette, the section rail, the back-to-top button, the
+   keyboard chip, the toast, the hover preview, segmented controls, the search
+   button, ghost buttons, the Labs band cards, the proof tiles, the Plain terms
+   tiles, the Labs index cards and the Labs visit card.
+4. **Adaptive tone.** The header, rail and back-to-top take the dark tint over the
+   dark bands, and the header's labels, search button, menu button and call to
+   action follow.
+5. **Restraint on purpose.** Content cards, diagrams and the page background stay as
+   they were: the site's own backgrounds are flat, so glass there would refract
+   nothing and cost legibility.
+
+### Verified
+
+- 60 page loads across both sites at 1440, 1024, 768 and 390: no console errors
+  besides the 404 page's own 404, and no horizontal overflow.
+- Scrolling stays at 60fps with the glass on: median frame 16.7ms, p95 17.4ms,
+  worst 19.5ms, which matches the build without it. Lens maps are rounded to 4px
+  steps and cached, so the morphing header reuses one lens instead of building a
+  new one each step.
+- Largest paint on home unchanged (116 to 212ms), still the hero line.
+- Cross-document transitions still run with glass: the header layer and the case
+  diagram layer both animate.
+- `prefers-reduced-transparency: reduce` turns every surface solid (checked with
+  emulated media: `backdrop-filter: none`, 96% opaque).
+- The generated thumbnails and link preview cards are untouched: those pages never
+  load the script, so no glass is applied. Re-rendered and compared to confirm.
+
+### Not verified
+
+- Safari and Firefox (they take the frosted path), and a physical phone.
+
+### Second pass, same day: more glass, better glass
+
+1. **A truer lens.** The bevel follows a spherical profile now, so light bends
+   hardest at the very rim and eases off, and round controls (search, menu,
+   back-to-top, the segmented droplet) take a dome lens across their whole face.
+2. **New glass:** the hero showcase over its dark stage, the hero badge, the case
+   facts card, the next-case card, the live embed bar, the Labs product panels,
+   and the segmented indicator as a droplet.
+3. **Flat glass** (tint and rim, no backdrop work) for the many small pieces: the
+   marquee pills, the chips, the case chips and the stat tiles.
+4. **Mint glass** for the Labs rule cards.
+5. **A base colour.** Glass takes `--gl-rgb`, so warm surfaces stay warm. Without
+   it the showcase turned grey over the dark stage.
+6. **Cost guards.** A pane over 150k px² uses one displacement pass instead of
+   three; over 420k px² it keeps frosted glass, unless it is an overlay that is
+   only on screen while open.
+7. **Glass buttons press:** the bevel flattens and the tint drops.
+
+Measured against the same page without any glass, in one browser run, back to
+back: identical median and p95 frame times while scrolling, at 1x and 2x. The
+machine was pinned to 30fps for both builds during that run, so the numbers are
+comparative, not absolute.
+
+### Third pass, same day: glass you can see, and motion to match
+
+1. **Every tint drops and every lens bends harder.** Tints fall by roughly a fifth
+   (the header to .46, the rail to .3, the showcase to .87), refraction rises about
+   a third, the rim gains a brighter inner highlight and a hairline outer edge, and
+   `.gl--spec` now carries a sheen across the face as well as the light that
+   follows the pointer. Colour splits a little wider at the rim.
+2. **Contrast held.** The header blurs more (9 instead of 7) to stay readable at
+   the lower tint, and over the dark bands its tint goes up to .54, because bright
+   cards passing underneath were washing out the labels.
+3. **Motion.** The segmented droplet stretches as it slides, the rail dot pops when
+   it takes over, marquee pills lift under the pointer, and every glass control
+   sinks slightly when pressed. All of it is off with reduced motion.
+4. **Lenses only while on screen.** An observer switches each lens off when its
+   surface leaves the viewport.
+
+### Measured, with the frame rate cap removed so the numbers mean something
+
+| page | surfaces | frame with glass | without | cost | headroom |
+| --- | --- | --- | --- | --- | --- |
+| Portfolio home, 1440 at 2x | 55 | 5.53ms | 4.01ms | 1.52ms | 181fps |
+| Portfolio home, phone at 3x | 54 | 4.93ms | 3.69ms | 1.24ms | 203fps |
+| A case page, 1440 at 2x | 24 | 6.50ms | 4.68ms | 1.82ms | 154fps |
+| Labs home, 1440 at 2x | 43 | 7.05ms | 4.15ms | 2.90ms | 142fps |
+
+A 60fps frame allows 16.7ms, so the heaviest page runs at about a third of the
+budget: between 2.4 and 3.6 times the headroom it needs. The same page with the
+glass classes stripped at runtime is the control.
+
+### Where the next cycle should look
+
+- The segmented control indicator could become a true Apple style lens that
+  magnifies the label beneath it. It needs the indicator above the labels, which
+  changes the markup.
+
+---
+
 ## Cycle 17 - 2026-09-19 · Signature interactions
 
 **Why this.** John asked for a full inspection, adding whatever would make the site

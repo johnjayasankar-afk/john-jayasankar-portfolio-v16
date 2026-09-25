@@ -36,7 +36,9 @@ DOM = P.SITE['domain']
 EMAIL = P.SITE['email']
 RESUME = P.SITE['resume']
 LABS_URL = P.SITE['labs']
-LASTMOD = '2026-09-16'
+# The day the site was last built, which is the day its content last changed.
+# Set LASTMOD in the environment to pin it (a rebuild that changes nothing).
+LASTMOD = os.environ.get('LASTMOD') or __import__('datetime').date.today().isoformat()
 UPDATED = __import__('datetime').date.fromisoformat(LASTMOD).strftime('%B %Y')
 
 NEWTAB = '<span class="sr-only"> (opens in a new tab)</span>'
@@ -114,6 +116,30 @@ def fingerprint(rel):
 def img_v(rel):
     """An image URL stamped with its content hash, like the CSS and JS."""
     return '/%s?v=%s' % (rel, fingerprint(rel))
+
+
+def webp_of(url):
+    """The WebP beside a JPEG, when one has been made for it."""
+    rel = url.split('?')[0].lstrip('/')
+    alt = rel[:-4] + '.webp'
+    return img_v(alt) if rel.endswith('.jpg') and os.path.isfile(os.path.join(ROOT, alt)) else None
+
+
+def wsource(url, sizes=''):
+    """A <source> offering WebP, or nothing when there is no WebP to offer."""
+    w = webp_of(url)
+    return '<source srcset="%s" type="image/webp"%s>' % (w, (' sizes="%s"' % sizes) if sizes else '') if w else ''
+
+
+def wsource_set(pairs, sizes=''):
+    """The same for a srcset: every entry must have a WebP or the set is dropped."""
+    outs = []
+    for url, width in pairs:
+        w = webp_of(url)
+        if not w:
+            return ''
+        outs.append('%s %s' % (w, width))
+    return '<source srcset="%s" type="image/webp"%s>' % (', '.join(outs), (' sizes="%s"' % sizes) if sizes else '')
 
 
 def thumb(s):
@@ -256,12 +282,16 @@ HEAD = """<!doctype html>
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/assets/img/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
 <noscript><style>.hdr__bar { background: rgba(248, 246, 241, .94); }</style></noscript>
 {{preload}}<link rel="stylesheet" href="/assets/css/{{sheet}}?v={{v}}">
 {{ld}}</head>
 """
 
-PRELOAD = '<link rel="preload" href="/assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>\n'
+# Both faces render inside the first screen: the sans everywhere, the mono in the
+# badge, the section numbers and every label. Preloading the mono removes its swap.
+PRELOAD = ('<link rel="preload" href="/assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>\n'
+           '<link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>\n')
 
 CHROME = """<a class="skip" href="#main">Skip to content</a>
 <div class="progress" aria-hidden="true"><i data-scrollbar></i></div>
@@ -342,8 +372,9 @@ def mega():
     lead = ('<div class="mega__lead"><p class="mega__h">Overview</p>'
             '<a class="mega__big" href="/work"><span>All work</span><small>%02d systems, filterable</small></a>'
             '<a class="mega__big" href="/approach"><span>Approach</span><small>The control model</small></a>'
-            '<a class="mega__card" href="/labs"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="/assets/img/work/daylight.jpg" alt="" width="640" height="400" decoding="async">'
+            '<a class="mega__card" href="/labs"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="/assets/img/work/daylight.jpg" data-srcw="/assets/img/work/daylight.webp" alt="" width="640" height="400" decoding="async">'
             '<span class="mega__card-t">Labs</span><small>RideLens, Daylight, RailDrop, and Gridiron</small></a></div>') % len(SYSTEMS)
+    lead = lead.replace('/assets/img/work/daylight.webp', webp_of(img_v('assets/img/work/daylight.jpg')) or '')
     lead = lead.replace('/assets/img/work/daylight.jpg', img_v('assets/img/work/daylight.jpg'))
     return '<div class="mega" id="mega-work" data-mega-panel><div class="mega__grid">%s%s</div></div>' % (lead, ''.join(cols))
 
@@ -402,6 +433,29 @@ def shell(page, path, title, desc, label, body, og_type='website', robots='index
         scripts(),
         '</body>\n</html>\n',
     ])
+
+
+def website_ld():
+    return {'@context': 'https://schema.org', '@type': 'WebSite', 'name': 'John Jayasankar',
+            'url': DOM + '/', 'inLanguage': 'en-US',
+            'description': P.SITE.get('tagline') or 'Production AI agents and 0→1 financial infrastructure.',
+            'author': {'@type': 'Person', 'name': 'John Jayasankar', 'url': DOM + '/'}}
+
+
+def profile_ld():
+    """About is a page about a person, which is what a ProfilePage says."""
+    person = dict(person_ld())
+    person.pop('@context', None)
+    return {'@context': 'https://schema.org', '@type': 'ProfilePage', 'url': DOM + '/about',
+            'dateModified': LASTMOD, 'mainEntity': person}
+
+
+def list_ld(name, path, items):
+    """An ordered list of work, so a crawler sees the set and not just one page."""
+    return {'@context': 'https://schema.org', '@type': 'ItemList', 'name': name, 'url': DOM + path,
+            'numberOfItems': len(items),
+            'itemListElement': [{'@type': 'ListItem', 'position': i + 1, 'name': s['name'],
+                                 'url': DOM + '/work/' + s['slug']} for i, s in enumerate(items)]}
 
 
 def person_ld():
@@ -649,9 +703,9 @@ def home():
     for slug in L['slugs']:
         s = BY[slug]
         kind, v, unit = s['ledger']
-        rows.append('<li><a class="lrow" href="/work/%s" data-peek="%s"><span class="lrow__id">%s</span><span class="lrow__name">%s</span>'
+        rows.append('<li><a class="lrow" href="/work/%s" data-peek="%s" data-peekw="%s"><span class="lrow__id">%s</span><span class="lrow__name">%s</span>'
                     '<span class="lrow__kind">%s</span><span class="lrow__m"><b>%s</b> %s</span><span class="lrow__go">%s</span></a></li>'
-                    % (slug, thumb(s), s['id'], esc(s['name']), esc(kind), mval(v), esc(unit), ARROW))
+                    % (slug, thumb(s), webp_of(thumb(s)) or '', s['id'], esc(s['name']), esc(kind), mval(v), esc(unit), ARROW))
     featured = ('<section class="sect" id="featured" data-locus data-label="Selected work" aria-labelledby="featured-h"><div class="wrap">'
                 '%s<div class="fgrid">%s</div>'
                 '<div class="ledger" id="ledger" data-locus data-label="Also shipped" data-reveal>'
@@ -713,7 +767,7 @@ def home():
 
     body = hero + marquee(H['strip']['label'], H['strip']['note']) + featured + before_after + labs + approach + writing + contact
     title, desc = P.META['home']
-    return shell('home', '/', title, desc, 'Home', body, ld=person_ld())
+    return shell('home', '/', title, desc, 'Home', body, ld=[person_ld(), website_ld()])
 
 
 # ----------------------------------------------------------------------------
@@ -771,7 +825,7 @@ def labs_page():
         esc(LABS_URL), esc(host(LABS_URL)), esc(C['h2']), esc(C['lede']), esc(C['link'][0]), EXTI, NEWTAB, hint(L['hint']))
     body = head + ''.join(feats) + shared + visit
     title, desc = P.META['labs']
-    return shell('labs', '/labs', title, desc, 'Labs', body)
+    return shell('labs', '/labs', title, desc, 'Labs', body, ld=list_ld('Labs builds', '/labs', LABS))
 
 
 # ----------------------------------------------------------------------------
@@ -823,7 +877,7 @@ def work():
             + '<div class="rows__foot">%s<button class="tbtn" type="button" data-copy-link>Copy link</button></div>' % hint(W['hint'])
             + '<p class="sr-only" aria-live="polite" data-facet-live></p></div></section>\n')
     title, desc = P.META['work']
-    return shell('work', '/work', title, desc, 'Work', body)
+    return shell('work', '/work', title, desc, 'Work', body, ld=list_ld('Selected work', '/work', SYSTEMS))
 
 
 # ----------------------------------------------------------------------------
@@ -880,7 +934,7 @@ EMBED_TPL = """<figure class="embed" data-embed>
 CLOSE_TPL = """<div class="closeout">
   <a class="nextcard" href="/work/{{nslug}}">
     <span class="nextcard__copy"><small>Next system</small><strong>{{nname}}</strong><em><b>{{nv}}</b> · {{nk}}</em><span class="nextcard__go"><span>Read the case</span>{{arrow}}</span></span>
-    <span class="nextcard__img"><img src="{{nimg}}" alt="" width="640" height="400" loading="lazy" decoding="async"></span>
+    <span class="nextcard__img"><picture>{{nwebp}}<img src="{{nimg}}" alt="" width="640" height="400" loading="lazy" decoding="async"></picture></span>
   </a>
   <p class="also"><span class="also__k">Also see</span>{{also}}</p>
 </div>
@@ -965,7 +1019,7 @@ def case(s, idx):
         facts_html += '<div><dt>Live</dt><dd>%s</dd></div>' % link('<span>Open %s</span>' % esc(s['name']), s['live'], 'tlink')
     also = '<span class="sep" aria-hidden="true">·</span>'.join(
         '<a class="tlink" href="/work/%s"><span>%s</span></a>' % (a, esc(BY[a]['name'])) for a in s['also'] if a != nxt['slug'])
-    closeout = render(CLOSE_TPL, nimg=thumb(nxt), nslug=nxt['slug'], nname=esc(nxt['name']), nv=mval(nxt['ledger'][1]), nk=esc(nxt['ledger'][2]),
+    closeout = render(CLOSE_TPL, nimg=thumb(nxt), nwebp=wsource(thumb(nxt)), nslug=nxt['slug'], nname=esc(nxt['name']), nv=mval(nxt['ledger'][1]), nk=esc(nxt['ledger'][2]),
                       pslug=prv['slug'], pname=esc(prv['name']), also=also, arrow=ARROW,
                       hint=hint('1-%d beats · j / k · ← → adjacent · y link · b brief' % min(9, len(beats))))
     body = render(CASE_TPL, sec='Labs' if lab else 'Work', sec_href='/labs' if lab else '/work',
@@ -976,16 +1030,17 @@ def case(s, idx):
                   beats=''.join(beat_html(s, b, j) for j, b in enumerate(beats)), closeout=closeout,
                   brief=json.dumps({'text': brief_text(s)}, ensure_ascii=False).replace('</', '<\\/'))
     desc = P.CASE_DESC.get(s['slug'], s['lede'])
+    card = 'assets/img/og/%s.jpg' % s['slug']
+    has_card = os.path.isfile(os.path.join(ROOT, card))
     ld = [{'@context': 'https://schema.org', '@type': 'TechArticle', 'headline': s['title'], 'description': desc,
            'author': {'@type': 'Person', 'name': 'John Jayasankar', 'url': DOM + '/'}, 'dateModified': LASTMOD,
            'isPartOf': {'@type': 'WebSite', 'name': 'John Jayasankar', 'url': DOM + '/'},
-           'url': DOM + '/work/' + s['slug'], 'image': og_img()},
+           'url': DOM + '/work/' + s['slug'], 'image': DOM + img_v(card) if has_card else og_img()},
           {'@context': 'https://schema.org', '@type': 'BreadcrumbList', 'itemListElement': [
               {'@type': 'ListItem', 'position': 1, 'name': 'Home', 'item': DOM + '/'},
               {'@type': 'ListItem', 'position': 2, 'name': 'Labs' if lab else 'Work', 'item': DOM + ('/labs' if lab else '/work')},
               {'@type': 'ListItem', 'position': 3, 'name': s['name'], 'item': DOM + '/work/' + s['slug']}]}]
-    card = 'assets/img/og/%s.jpg' % s['slug']
-    og = (card, '%s · %s · John Jayasankar' % (s['name'], s['title'])) if os.path.isfile(os.path.join(ROOT, card)) else None
+    og = (card, '%s · %s · John Jayasankar' % (s['name'], s['title'])) if has_card else None
     return shell('case', '/work/' + s['slug'], s['name'] + ' · John Jayasankar', desc, s['short'], body,
                  og_type='article', ld=ld, section='labs' if lab else 'work', og=og)
 
@@ -1037,7 +1092,7 @@ ABOUT_TPL = """<section class="phead phead--about" id="top" data-locus data-labe
       {{cont}}
     </div>
     <div class="about__media" data-reveal style="--rd:1">
-      <div class="portrait"><img src="/assets/img/portrait-sq.jpg" srcset="/assets/img/portrait-sq-480.jpg 480w, /assets/img/portrait-sq.jpg 768w" sizes="(min-width: 1024px) 490px, 92vw" width="768" height="768" alt="John Jayasankar" fetchpriority="high" decoding="async"></div>
+      <div class="portrait"><picture>{{portrait_webp}}<img src="/assets/img/portrait-sq.jpg" srcset="/assets/img/portrait-sq-480.jpg 480w, /assets/img/portrait-sq.jpg 768w" sizes="(min-width: 1024px) 490px, 92vw" width="768" height="768" alt="John Jayasankar" fetchpriority="high" decoding="async"></picture></div>
       <div class="edu" id="education"><span class="edu__logo">{{emark}}</span><div><h2 class="edu__school">{{school}}</h2><p class="edu__deg">{{degree}}</p><p class="edu__note">{{enote}}</p></div></div>
     </div>
   </div>
@@ -1065,8 +1120,9 @@ def about():
     exp = []
     for i, e in enumerate(A['experience']):
         start, end = e['roles'][-1][1].split(' to ')[0], e['roles'][0][1].split(' to ')[-1]
-        cases = ''.join('<li><a class="casechip" href="%s" data-peek="%s"><span class="casechip__n">%s</span><span class="casechip__m"><b>%s</b> %s</span></a></li>'
-                        % (href, thumb(BY[href.rsplit('/', 1)[-1]]), esc(name), mval(v), esc(k)) for name, href, v, k in e['cases'])
+        cases = ''.join('<li><a class="casechip" href="%s" data-peek="%s" data-peekw="%s"><span class="casechip__n">%s</span><span class="casechip__m"><b>%s</b> %s</span></a></li>'
+                        % (href, thumb(BY[href.rsplit('/', 1)[-1]]), webp_of(thumb(BY[href.rsplit('/', 1)[-1]])) or '',
+                           esc(name), mval(v), esc(k)) for name, href, v, k in e['cases'])
         roles = ''.join('<div class="role"><h4 class="role__t">%s</h4><p class="role__d">%s</p><ul class="ticks ticks--sm">%s</ul></div>'
                         % (esc(t), esc(d), ''.join('<li>%s</li>' % masked(esc(x)) for x in items)) for t, d, items in e['roles'])
         exp.append(('<article class="exp" id="%s" data-locus data-label="%s" aria-labelledby="%s-h" data-reveal%s>'
@@ -1090,7 +1146,9 @@ def about():
     I = A['glossary']
     inst = ''.join('<div class="inst__item"><dt class="inst__term">%s</dt><dd class="inst__name">%s</dd></div>' % (esc(term), esc(meaning))
                    for term, meaning in I['terms'])
-    body = render(ABOUT_TPL, label=slabel(None, A['kicker']), h1=esc(A['h1']).replace('Lead Product Manager', '<span class="about__role">Lead Product Manager</span>'),
+    body = render(ABOUT_TPL, portrait_webp=wsource_set([('/assets/img/portrait-sq-480.jpg', '480w'), ('/assets/img/portrait-sq.jpg', '768w')],
+                                                       '(min-width: 1024px) 490px, 92vw'),
+                  label=slabel(None, A['kicker']), h1=esc(A['h1']).replace('Lead Product Manager', '<span class="about__role">Lead Product Manager</span>'),
                   bio=''.join('<p>%s</p>' % masked(esc(p)) for p in A['bio']),
                   acts=btn('Email me', 'mailto:' + EMAIL, 'primary', arrow=True) + btn('Résumé', RESUME, 'ghost') + btn('LinkedIn', P.SITE['linkedin'], 'ghost'),
                   mail=mail(), cont=CONTINUE, emark=mark_span(E['logo'], 96, 30), school=esc(E['school']), degree=esc(E['degree']),
@@ -1101,7 +1159,7 @@ def about():
                   sklinks='<span class="sep" aria-hidden="true">·</span>'.join(tlink(l, h) for l, h in Sk['links']),
                   instlabel=slabel('02', I['kicker'], dark=True), insth=esc(I['h2']), instl=esc(I['lede']), inst=inst)
     title, desc = P.META['about']
-    return shell('about', '/about', title, desc, 'About', body, ld=person_ld())
+    return shell('about', '/about', title, desc, 'About', body, ld=profile_ld())
 
 
 # ----------------------------------------------------------------------------
@@ -1149,7 +1207,7 @@ SIMPLE_TPL = """<body class="simple" data-label="Simple">
 <header id="dhead" class="container" data-sec data-label="Top">
   <div class="topline"><p class="locus" data-simple-locus aria-hidden="true">01 / {{nsec}} · Top</p><div class="topline__r"><button class="kbtn" type="button" data-cmdk aria-label="Open command palette" aria-keyshortcuts="Meta+K Control+K"><span data-modkey>⌘</span>K</button><a class="switch" href="/">Full site <span aria-hidden="true">→</span></a></div></div>
   <div class="row">
-    <div id="dpic"><img src="/assets/img/portrait-sq-480.jpg" srcset="/assets/img/portrait-sq-240.jpg 240w, /assets/img/portrait-sq-480.jpg 480w" sizes="240px" width="240" height="240" alt="John Jayasankar" fetchpriority="high" decoding="async"></div>
+    <div id="dpic"><picture>{{dpic_webp}}<img src="/assets/img/portrait-sq-480.jpg" srcset="/assets/img/portrait-sq-240.jpg 240w, /assets/img/portrait-sq-480.jpg 480w" sizes="240px" width="240" height="240" alt="John Jayasankar" fetchpriority="high" decoding="async"></picture></div>
     <div id="ddesc">
       <h1>John Jayasankar</h1>
       <p class="tagline">{{tagline}}</p>
@@ -1187,12 +1245,14 @@ def simple():
                         '<span class="tile"><img src="/assets/img/logo-%s.svg" alt="%s" width="%d" height="%d"%s decoding="async"></span></div>'
                         '<div class="desc">%s</div></div>' % (esc(e['span']), e['logo'], esc(e['alt']), w, h,
                                                             ' loading="lazy"' if i > 2 else '', ''.join('<p>%s</p>' % x for x in e['html'])))
-    cards = ''.join('<li class="card"><a href="/work/%s"><img src="%s" alt="" width="480" height="300" loading="lazy" decoding="async">'
-                    '<strong>%s</strong><span>%s</span></a></li>' % (slug, thumb(BY[slug]), esc(name), esc(cap))
+    cards = ''.join('<li class="card"><a href="/work/%s"><picture>%s<img src="%s" alt="" width="480" height="300" loading="lazy" decoding="async"></picture>'
+                    '<strong>%s</strong><span>%s</span></a></li>' % (slug, wsource(thumb(BY[slug])), thumb(BY[slug]), esc(name), esc(cap))
                     for slug, name, cap in S['systems'])
     pubs = ''.join('<li><a class="pub-title" href="%s">%s</a> · %s</li>' % (n['href'], esc(n['title']), esc(n['dek'])) for n in P.NOTES)
-    pets = ''.join('<div class="project"><div class="pico"><a href="/work/%s" tabindex="-1" aria-hidden="true"><img src="%s" alt="" width="480" height="300" loading="lazy" decoding="async"></a></div>'
-                   '<div class="pdesc">%s</div></div>' % (p['slug'], img_v('assets/img/work/%s.jpg' % p['slug']), p['html']) for p in S['pets'])
+    pets = ''.join('<div class="project"><div class="pico"><a href="/work/%s" tabindex="-1" aria-hidden="true"><picture>%s<img src="%s" alt="" width="480" height="300" loading="lazy" decoding="async"></picture></a></div>'
+                   '<div class="pdesc">%s</div></div>'
+                   % (p['slug'], wsource(img_v('assets/img/work/%s.jpg' % p['slug'])),
+                      img_v('assets/img/work/%s.jpg' % p['slug']), p['html']) for p in S['pets'])
     outcomes = ''.join('<div class="pub"><a class="pub-title" href="/work/%s">%s</a><div class="pub-venue">%s</div><div class="pub-authors">%s</div></div>'
                        % (slug, esc(BY[slug]['title']), esc(venue), esc(line)) for slug, venue, line in S['outcomes'])
     misc = ''.join('<li>%s</li>' % x for x in S['misc_html'])
@@ -1201,7 +1261,8 @@ def simple():
                   canonical='<link rel="canonical" href="%s">' % esc(DOM + '/simple'),
                   theme='#ffffff', ogtype='profile', ogimg=esc(og_img()), ogalt=esc(P.SITE['og_alt']),
                   preload=PRELOAD, sheet='simple.css', v=V['scss'], ld=ld_block(person_ld()))
-    body = render(SIMPLE_TPL, nsec='%02d' % len(S['sections']), tagline=esc(S['tagline']), icons=icons, email=EMAIL,
+    body = render(SIMPLE_TPL, dpic_webp=wsource_set([('/assets/img/portrait-sq-240.jpg', '240w'), ('/assets/img/portrait-sq-480.jpg', '480w')], '240px'),
+                  nsec='%02d' % len(S['sections']), tagline=esc(S['tagline']), icons=icons, email=EMAIL,
                   timeline=''.join(timeline), bio=S['bio_html'], cards=cards, build=S['build_html'],
                   writing=S['writing_html'], pubs=pubs, pets_intro=S['pets_intro_html'], pets=pets, outcomes=outcomes,
                   misc=misc, foot=esc(S['foot']))
@@ -1254,6 +1315,55 @@ def sitemap():
 
 def robots():
     return 'User-agent: *\nAllow: /\n\nSitemap: %s/sitemap.xml\n' % DOM
+
+
+def manifest():
+    """Installable, with the site's own icon and ground colour."""
+    return json.dumps({
+        'name': 'John Jayasankar', 'short_name': 'Jayasankar',
+        'description': P.META['home'][1],
+        'start_url': '/', 'scope': '/', 'display': 'standalone', 'id': '/',
+        'background_color': '#f8f6f1', 'theme_color': '#f8f6f1', 'lang': 'en-US', 'dir': 'ltr',
+        'icons': [
+            {'src': '/assets/img/icon-192.png', 'sizes': '192x192', 'type': 'image/png', 'purpose': 'any'},
+            {'src': '/assets/img/icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'any'},
+            {'src': '/assets/img/icon-512.png', 'sizes': '512x512', 'type': 'image/png', 'purpose': 'maskable'},
+            {'src': '/assets/img/favicon.svg', 'sizes': 'any', 'type': 'image/svg+xml'},
+        ],
+    }, ensure_ascii=False, indent=2) + '\n'
+
+
+def security_txt():
+    """RFC 9116. Expires a year out, which is the point of the field."""
+    expires = __import__('datetime').date.fromisoformat(LASTMOD).replace(
+        year=__import__('datetime').date.fromisoformat(LASTMOD).year + 1).isoformat()
+    return ('Contact: mailto:%s\n'
+            'Expires: %sT00:00:00.000Z\n'
+            'Preferred-Languages: en\n'
+            'Canonical: %s/.well-known/security.txt\n' % (EMAIL, expires, DOM))
+
+
+def llms_txt():
+    """A map of the site for a reader that arrives without a browser."""
+    def group(title, rows):
+        return '## %s\n\n%s\n' % (title, '\n'.join('- [%s](%s%s): %s' % (n, DOM, u, d) for n, u, d in rows))
+    cases = [(s['name'], '/work/' + s['slug'], P.CASE_DESC.get(s['slug'], s['lede'])) for s in SYSTEMS]
+    pages = [('Work', '/work', 'Every system, filterable by kind.'),
+             ('Labs', '/labs', 'Independent products, built outside the day job.'),
+             ('Approach', '/approach', 'How autonomy is earned and bounded.'),
+             ('About', '/about', 'Background, experience and contact.'),
+             ('Writing', '/writing', 'Short theses on agents, markets and product economics.'),
+             ('Simple', '/simple', 'The whole site as one plain page.'),
+             ('Disclaimer', '/legal', 'Whose views these are.')]
+    return ('# John Jayasankar\n\n'
+            '> Lead Product Manager in New York. Production AI agents and 0→1 financial\n'
+            '> infrastructure at Quantile (LSEG), plus independent products shipped end to end.\n\n'
+            'Every page is static HTML and readable without JavaScript. /simple is the whole\n'
+            'site as one plain page, which is the cheapest thing to read here.\n\n'
+            + group('Pages', pages) + '\n'
+            + group('Case studies', cases) + '\n'
+            '## Elsewhere\n\n- [Labs](%s): the independent products, on their own site.\n'
+            '- [Résumé](%s%s): one page, PDF.\n- Contact: %s\n' % (LABS_URL, DOM, RESUME, EMAIL))
 
 
 # ----------------------------------------------------------------------------
@@ -1314,6 +1424,9 @@ def main():
     written.append(write('404.html', notfound()))
     written.append(write('sitemap.xml', sitemap()))
     written.append(write('robots.txt', robots()))
+    written.append(write('site.webmanifest', manifest()))
+    written.append(write('llms.txt', llms_txt()))
+    written.append(write('.well-known/security.txt', security_txt()))
     problems, missing = check(written)
     for m in missing:
         print('note: referenced asset not present yet:', m)

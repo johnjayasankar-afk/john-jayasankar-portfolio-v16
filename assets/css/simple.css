@@ -31,9 +31,11 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-padding-top: 20px; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; color-scheme: light; scroll-padding-top: 20px; }
 body { margin: 0; background: #fff; color: var(--ink); font: 400 16px/1.6 var(--sans); letter-spacing: -.01em; -webkit-font-smoothing: antialiased; }
 img { display: block; max-width: 100%; }
+/* a <picture> is only a wrapper: the <img> stays the element the layout sees */
+picture { display: contents; }
 a { color: var(--link); text-decoration: underline; text-decoration-color: rgba(31, 107, 74, .35); text-underline-offset: 3px; transition: color .2s, text-decoration-color .2s; }
 a:hover { color: var(--link-hover); text-decoration-color: currentColor; }
 :focus-visible { outline: 2px solid var(--link); outline-offset: 3px; border-radius: 6px; }

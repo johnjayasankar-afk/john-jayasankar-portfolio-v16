@@ -1,0 +1,37 @@
+# John Jayasankar
+
+> Lead Product Manager in New York. Production AI agents and 0→1 financial
+> infrastructure at Quantile (LSEG), plus independent products shipped end to end.
+
+Every page is static HTML and readable without JavaScript. /simple is the whole
+site as one plain page, which is the cheapest thing to read here.
+
+## Pages
+
+- [Work](https://johnjayasankar.com/work): Every system, filterable by kind.
+- [Labs](https://johnjayasankar.com/labs): Independent products, built outside the day job.
+- [Approach](https://johnjayasankar.com/approach): How autonomy is earned and bounded.
+- [About](https://johnjayasankar.com/about): Background, experience and contact.
+- [Writing](https://johnjayasankar.com/writing): Short theses on agents, markets and product economics.
+- [Simple](https://johnjayasankar.com/simple): The whole site as one plain page.
+- [Disclaimer](https://johnjayasankar.com/legal): Whose views these are.
+
+## Case studies
+
+- [Compression Setup Agent](https://johnjayasankar.com/work/setup-agent): Case study: a production AI agent that cut compression-run setup from 3.5 hours to 8 minutes and tripled run volume at constant headcount.
+- [Incident Triage Agent](https://johnjayasankar.com/work/incident-agent): Case study: an MCP-backed incident triage agent that cut expert investigation from 4.5 hours to 11 minutes and escalations to engineering by 78%.
+- [Cross-Currency Compression](https://johnjayasankar.com/work/cross-currency): Case study: a 0→1 launch of multilateral cross-currency compression across 12 currency pairs, with 34% more notional reduction per run for 18 banks.
+- [Dual-Source Valuation](https://johnjayasankar.com/work/valuation): Case study: dual-source valuation that surfaced discrepancies 48 hours earlier and cut failed-run resubmissions 91% across 24 banks.
+- [FX & NDF Compression](https://johnjayasankar.com/work/fx-compression): Case study: FX forward and NDF compression with clearing-house margin inside the optimizer, reaching 100% proposal acceptance across 40+ live runs.
+- [Agent Platform & Controls](https://johnjayasankar.com/work/platform): Case study: one human-supervised control pattern across five enterprise agent systems, with MCP servers, typed actions, approval gates, and evals.
+- [Pre-Trade Margin Simulator](https://johnjayasankar.com/work/margin-simulator): Case study: a 0→1 pre-trade margin simulator at OpenGamma that compared a trade’s initial margin across venues before execution.
+- [RideLens](https://johnjayasankar.com/work/ridelens): Every ride, one comparison. Uber, Lyft, Empower, and Curb ranked before you book.
+- [Daylight](https://johnjayasankar.com/work/daylight): Adaptive display lighting for macOS: warmth and brightness on a schedule you set, offline and explainable.
+- [RailDrop](https://johnjayasankar.com/work/raildrop): Know when your train gets cheaper. RailDrop watches listed Amtrak fares across your travel window and never invents a price.
+- [Gridiron](https://johnjayasankar.com/work/gridiron): Every game. Every drive. One view. A live NFL and college football command center with a 3D field for every game and odds from named sources.
+
+## Elsewhere
+
+- [Labs](https://labs.johnjayasankar.com/): the independent products, on their own site.
+- [Résumé](https://johnjayasankar.com/John_Jayasankar_Resume.pdf): one page, PDF.
+- Contact: johnjayasankar@gmail.com
