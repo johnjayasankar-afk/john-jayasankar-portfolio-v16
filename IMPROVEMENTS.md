@@ -281,6 +281,16 @@ ledger and the same checkers, and one thing the portfolio does not have.
     LinkedIn joins the bot-walled list at the same time, at 999, with what a
     logged-out browser actually gets written down beside it.
 
+19. **The A/B runner is in the repository now, which is the part that mattered.**
+    `tools/scroll-perf.mjs` could measure one build; the thing that actually
+    stopped four bad changes shipping was alternating two builds round by round
+    in one browser, and that lived in a scratch file. It takes two origins now.
+    It prints the spread beside every median and says **"says nothing, the
+    ranges overlap"** rather than a percentage, because a percentage between two
+    overlapping ranges is how a change that does nothing gets believed. Verified
+    against the null case: pointing it at the same build twice, every metric
+    refuses to report a difference, including one that differed by 15%.
+
 ### Verified
 
 - **The parallax, after the revert**, by computed transform rather than by
