@@ -265,6 +265,17 @@ PRODUCTS = [
       method='SPOT_UNAVAILABLE in shared/format.ts: a play with no reported '
              'spot renders "Ball spot unavailable" instead of a position. '
              'Held by tests/watch-delay.test.ts and e2e/slate.spec.ts.'),
+    C(id='gridiron.grounds', value='366', about='grounds with a published capacity',
+      origin='repo', source='gridiron', check='here', verified='2026-09-26',
+      method='venues carrying a capacity in shared/venues.ts. The stands are '
+             'built from it where it exists, and a venue without one gets the '
+             'default rather than an invented number.'),
+    C(id='gridiron.venues', value='958', about='venues in the table',
+      supports='gridiron.grounds',
+      origin='repo', source='gridiron', check='here', verified='2026-09-26',
+      method='records in VENUES, shared/venues.ts. The size of the table behind '
+             'the 366: most venues have no published capacity, and the site '
+             'says 366 rather than 958 for that reason.'),
     C(id='gridiron.tests', value='669', about='unit and integration tests',
       origin='repo', source='gridiron', check='build', verified='2026-09-25',
       method='the total vitest reports: npm test'),
@@ -311,6 +322,10 @@ DERIVE = {
     'gridiron.guessed':
         "grep -c \"^export const SPOT_UNAVAILABLE = 'Ball spot unavailable';$\" "
         "shared/format.ts",
+    'gridiron.grounds':
+        "grep -c 'capacity: [0-9]' shared/venues.ts",
+    'gridiron.venues':
+        "grep -c \"espnId: '\" shared/venues.ts",
     'gridiron.tests':
         "npm test 2>&1 | sed -n 's/.*Tests  *\\([0-9][0-9]*\\) passed.*/\\1/p' "
         "| tail -1",

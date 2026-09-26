@@ -243,6 +243,44 @@ ledger and the same checkers, and one thing the portfolio does not have.
       lesson is not about the CSS: a measurement that improves because a feature
       stopped working looks exactly like a measurement that improves.
 
+16. **The hero drift and the scroll progress bar run on the compositor now.**
+    Both were written by JavaScript on every scroll frame: two custom properties
+    on `.hero`, which invalidates style for the 3300 elements it contains, and a
+    `transform` on the progress bar. Where the browser supports a scroll-driven
+    animation they are declared in CSS against `scroll(root block)` instead, the
+    script checks the same feature and stands down, and neither is touched by
+    the main thread again.
+    - **Measured, nine interleaved rounds at 2x CPU throttle, both together
+      against the committed build**: style recalculation 888ms to 783ms with no
+      overlap between the ranges, and frames over 33ms during a full-page scroll
+      62 to 40. On Labs, where the bench is heavier, style 811ms to 674ms and
+      dropped frames 54 to 29.
+    - **Checked by reading the result, not the counter**, which is the whole
+      lesson of the attempt before it: `.hero::before` translates 0 to 22.67px
+      and the stage to -10.67px over a 600px gesture, against 22.7 and -10.7
+      from the JavaScript path, and the progress bar reads scaleX(0) at the top
+      and scaleX(1) at the bottom. On both sites.
+    - **The drift is gated on reduced motion and the progress bar is not.** The
+      blanket reduced-motion rule clamps `animation-duration`, which a
+      scroll-driven animation does not have, so it would not have stopped
+      either: the timeline is the scroll, not the clock. The drift is decoration
+      and stops; the bar is a position indicator and does not.
+
+17. **Two figures the brief named were missing, and one of them was wrong.**
+    Gridiron's venue table was never in the ledger. It is now, and counting it
+    properly says **958** records, not the 959 noted earlier: that figure counted
+    the line declaring the type as well. The 366 grounds the site prints, which
+    is the venues that carry a published capacity, is now read from the ledger
+    rather than written into the copy.
+
+18. **The link check never requested the resume PDF.** It only followed absolute
+    URLs, and the PDF is linked as a path from twenty pages. It is not generated
+    by the build, so nothing would have noticed it going missing. The checker now
+    requests same-origin files as well, which took the portfolio from 43 URLs to
+    59. Validated by moving the PDF aside: one failure, naming all twenty pages.
+    LinkedIn joins the bot-walled list at the same time, at 999, with what a
+    logged-out browser actually gets written down beside it.
+
 ### Verified
 
 - **The parallax, after the revert**, by computed transform rather than by

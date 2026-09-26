@@ -314,7 +314,7 @@ SYSTEMS_B = [
                                                     ('Blue and amber', 'Blue marks the line of scrimmage and amber the line to gain. On goal to go, the goal line lights instead.'),
                                                     ('Shapes from the play type', 'Runs sweep and passes arc, kicks fly high, incompletions go out and come back, and sacks drop back.'),
                                                     ('Rulebook markings', 'Hash marks, numbers, the try line, goal posts and pylons follow the 2026 NFL and NCAA rulebooks.'),
-                                                    ('Sized to the venue', 'The stands are built from the real capacity where one is published, 366 grounds of them, and a venue reported as indoors is given a roof over the stands.')], kind='grid'),
+                                                    ('Sized to the venue', f"The stands are built from the real capacity where one is published, {V('gridiron.grounds')} grounds of them, and a venue reported as indoors is given a roof over the stands.")], kind='grid'),
       B('odds', 'Odds', 'Odds and win probability', [('Win probability', 'ESPN’s model after each reported play, and its matchup predictor before kickoff.'),
                                                      ('Sportsbook lines', 'Spread, moneyline and total with their opening lines, and after a game, how the result compared with the closing lines.'),
                                                      ('Kalshi prices', 'Each team’s contract to win from Kalshi’s public market data, with no account or key, drawn beside ESPN’s model in game flow.')],
