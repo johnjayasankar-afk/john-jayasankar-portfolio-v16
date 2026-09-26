@@ -207,8 +207,47 @@ ledger and the same checkers, and one thing the portfolio does not have.
     tested, with Pricing Hub allowed to answer "a workbook, not a codebase"
     rather than a number that would not mean the same thing.
 
+15. **Scrolling was measured, and then left alone.** `tools/scroll-perf.mjs`
+    drives a real scroll gesture through the compositor and records frame
+    intervals, long tasks and Chrome's own layout and style counters; an
+    interleaved A/B runner alternates two builds in one browser, because a
+    second measurement of the *same* build on this machine can differ from the
+    first by a third.
+    - **At normal speed both sites already hold 60fps on every page.** p50 is
+      16.7 ms; the home page drops six frames in a four-second scroll of its
+      whole length. There was no scroll problem to fix on this hardware.
+    - Under a 4x throttle, where the costs become visible, **five candidates were
+      measured and all five were thrown away**: batching the scroll spies'
+      `getBoundingClientRect` reads into one pass a frame, guarding the class
+      writes, pausing every animation on the page, removing `backdrop-filter`
+      entirely, and `content-visibility` on the sections. The first two moved
+      nothing and the batching version measured 9% *worse*, because the guard it
+      used built a string key from `className` on every call. Chrome already
+      no-ops a `classList.toggle` that is not changing anything, which is the
+      whole reason the guards bought nothing.
+    - **The sixth candidate looked like the win and was a regression.** Declaring
+      `--pz` and `--pz2` with `inherits: false` stops a per-frame custom-property
+      write invalidating style for the 3300-element `.hero` subtree. It measured
+      14% less style recalculation and a quarter fewer dropped frames, on both
+      sites, with ranges that did not overlap. It also stops the value reaching
+      `.hero::before` and `.hero__stage::before`, which are the only things that
+      read it: a pseudo-element inherits from its originating element, and a
+      non-inheriting property never arrives. The hero's light and its stage
+      stopped moving, and most of that 14% was the effect no longer running.
+      Caught by reading the computed transform rather than trusting the numbers.
+      Scrolled 600 px in a real gesture: without it `.hero::before` translates
+      0 to 22.7 px and the stage to -10.7 px, with it both stay at 0.
+    - **It reached production before it was finished.** An auto-commit running on
+      this machine committed the working tree at 13:59 and pushed it, and both
+      sites deployed with the parallax dead. Reverted in both repositories. The
+      lesson is not about the CSS: a measurement that improves because a feature
+      stopped working looks exactly like a measurement that improves.
+
 ### Verified
 
+- **The parallax, after the revert**, by computed transform rather than by
+  eye: `.hero::before` 0 to 22.7 px and `.hero__stage::before` to -10.7 px over a
+  600 px gesture, on both sites.
 - **Both sites build clean** and `verify_claims.py` exits 0 on both. 59 distinct
   claims across the two: 36 re-derived by a command, 4 that cannot be checked
   here and are reported as unchecked every run, 19 asserted.
@@ -229,20 +268,36 @@ ledger and the same checkers, and one thing the portfolio does not have.
   frame. Sent on render instead.
 - **Labs: all 11 outbound links and all 8 short links**, live. No embeds on Labs,
   so nothing to block.
-- **Transferred weight, measured before deciding anything, on both sites.** The
-  Labs landing page is 203 KB on the wire too, within a kilobyte of the
-  portfolio's, and for the same reasons. The portfolio's landing page is
-  203 KB: 26.3 KB document, 42.7 KB stylesheet, 27.0 KB script,
-  2.1 KB palette index, 63.2 KB of fonts, 32.7 KB image, 14.8 KB icons. The
-  brief's 485 KB is the uncompressed figure; Vercel serves brotli. CLS is 0.
-  TTFB 18 to 24 ms and DOMContentLoaded 137 ms from this machine, warm.
-  **203 KB is not a problem, so nothing was split, deferred or precompressed.**
-- **Precompression was measured rather than assumed.** Vercel's brotli returns
-  42,660 bytes for the stylesheet; its gzip returns 40,103; a plain local
-  `gzip -9` returns 38,399. The edge is compressing on the fly at a low quality
-  level, and it does not serve precompressed siblings from the repository, so
-  writing `.br` and `.gz` into `assets/` would add files nobody fetches. The
-  whole available win is about 10 KB of 203 KB.
+- **Weight, measured on the profile Lighthouse uses for mobile** (Slow 4G at
+  1.6 Mbps and 150 ms, CPU throttled 4x), against production and against a local
+  server, five runs each. Both landing pages transfer about **175 KB** and reach
+  first contentful paint at about **3.4 seconds**; `/work` is 173 KB and 2.7 s.
+  The brief's 485 KB is the uncompressed figure. CLS is 0.
+  **175 KB is not a weight problem, so nothing was split, deferred or
+  precompressed**, and each of the three things this phase proposed was tested
+  before being declined rather than after:
+  - **Splitting the stylesheet** rests on the schematic system being most of the
+    195 KB. It is **13%**, about 6 KB of the 42 KB that goes over the wire, and
+    the home page carries bays so it would need both halves anyway.
+  - **Deferring the home page's bays** was tested by serving a copy with every
+    `<svg>` emptied: 3331 elements down to 2586, 193 KB of markup down to 150 KB.
+    First paint moved 10% across six interleaved rounds, with the ranges
+    overlapping heavily. A fifth of the document is worth a tenth of a paint that
+    is not bound by the document.
+  - **Precompressing** would do nothing here. Vercel compresses on the fly and
+    does not serve a `.br` or `.gz` sibling out of the repository, so the files
+    would be dead weight. Its brotli returns 42,658 bytes for the stylesheet
+    where a local `gzip -9` returns 38,839, which says the edge compressor is
+    weaker than a static one, and there is no way to hand it a static one.
+  - What is left is not weight. Every byte has arrived by **1.3 s**; the rest is
+    the main thread parsing 195 KB of CSS and 90 KB of JavaScript at 4x. That is
+    a real cost and a different phase's problem.
+- **`tools/serve.py` was not compressing**, which made every local measurement in
+  this phase wrong in the same direction: the stylesheet arrived as 196 KB
+  instead of the 42 KB the CDN sends, and first paint read 3.0 s when the honest
+  figure was 2.2 s. It now gzips text responses the way Vercel does. Local and
+  production now agree within the noise, which is how the numbers above could be
+  trusted at all.
 - **Both Gridiron deployments serve the same build**: identical bundle hash
   `index-CmOCtivr.js`, identical `/api/health`, built 64 seconds apart.
 - **All eight product subdomains resolve** through a wildcard record and every
