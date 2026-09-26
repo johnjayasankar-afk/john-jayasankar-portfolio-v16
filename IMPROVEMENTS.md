@@ -291,6 +291,27 @@ ledger and the same checkers, and one thing the portfolio does not have.
     against the null case: pointing it at the same build twice, every metric
     refuses to report a difference, including one that differed by 15%.
 
+20. **The back-to-top ring joins the compositor, and three details land.**
+    - The ring is the same scroll progress the bar at the top shows, drawn round
+      a circle, and it was the last thing the script wrote on every scroll
+      frame. It is a scroll-driven animation now, and its 150ms transition is
+      gone with it: a scroll-driven animation is already continuous, and an ease
+      on top of it only adds lag. Verified by reading the computed
+      `stroke-dashoffset`: 100 at the top of the page, 0 at the bottom, on both
+      sites.
+    - **`scrollbar-gutter: stable`.** A page short enough not to scroll used to
+      sit a scrollbar's width off from one that did, on any platform that draws
+      a scrollbar in the layout. Everything now aligns with everything else.
+    - **A deep link says which thing was asked for.** Anchors are how a case
+      study gets shared: someone sends the beat, not the page. The target takes a
+      mint tint for a couple of seconds and then clears. Verified on landing,
+      after three seconds, and under reduced motion, where it does not animate.
+    - **The caret in a search field belongs to the site.** One line.
+    - **None of it cost anything.** Nine interleaved rounds at 2x: every metric
+      came back "says nothing, the ranges overlap", which is the answer wanted
+      from a change made for looks. Style recalculation trended 9% down from the
+      ring, without separating.
+
 ### Verified
 
 - **The parallax, after the revert**, by computed transform rather than by
