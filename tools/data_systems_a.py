@@ -6,7 +6,14 @@ Beat kinds: text | list | flow | role | live | grid | specs.  Phases are (tab,
 stop, caption). The bay spaces phases evenly and the system's story in
 tools/stories.py draws each one; the stop only records where the phase sits in
 the narrative. A grid body is (title, text) pairs, specs is (key, value) pairs;
-either may carry a note, printed below it."""
+either may carry a note, printed below it.
+Every figure in `metrics` comes from tools/claims.py, the ledger, through
+M(). No number is written here: tools/verify_claims.py re-derives what can be
+re-derived and reports the rest as unchecked rather than as passing.
+"""
+
+from claims import M, V  # noqa: E402
+
 
 def B(key, label, title, body, kind='text', tags=None, note=None):
     return dict(key=key, label=label, title=title, body=body, kind=kind, tags=tags, note=note)
@@ -18,7 +25,7 @@ SYSTEMS_A = [
     title='Operations agent that collapsed a 3.5-hour bottleneck',
     lede='A production AI agent inside a live operations workflow, not a side chatbot. Bounded actions, operator visibility, and zero AI-initiated configuration errors in its first six months.',
     org='Quantile · LSEG', stage='0→1 launch', year='2025', role='Lead Product Manager',
-    metrics=[('3.5h → 8m', 'setup time'), ('3×', 'run volume'), ('0', 'AI config errors / 6 mo')],
+    metrics=[M('setup-agent.time'), M('setup-agent.volume'), M('setup-agent.errors')],
     ledger=('Production AI', '3.5h → 8m', 'setup time'),
     bay=dict(title='Setup agent · compression-run setup', sub='Bottleneck: senior engineering owns every setup',
              big='3.5h → 8m', big_sub='setup time',
@@ -48,7 +55,7 @@ SYSTEMS_A = [
     title='Incident agent that returned 750+ engineering hours a year',
     lede='When something broke in production, ops still paged senior engineers by default. The agent gathers domain evidence first, sharpens the diagnosis, and escalates only when the evidence is incomplete.',
     org='Quantile · LSEG', stage='Production', year='2025', role='Lead Product Manager',
-    metrics=[('4.5h → 11m', 'investigation'), ('−78%', 'escalations'), ('750+', 'eng hours / year')],
+    metrics=[M('incident-agent.time'), M('incident-agent.escalations'), M('incident-agent.hours')],
     ledger=('Production AI · MCP', '4.5h → 11m', 'investigation'),
     bay=dict(title='Incident agent · production support', sub='Incident opens · default path still pages engineering',
              big='4.5h → 11m', big_sub='expert triage → ops cycle',
@@ -81,7 +88,7 @@ SYSTEMS_A = [
     title='Multilateral compression for trillions in trapped notional',
     lede='Banks held large cross-currency books that could only net in pairs. A central settlement path made network-wide offsets executable, so notional stuck in pairs became eligible to compress.',
     org='Quantile · LSEG', stage='0→1 launch', year='2024', role='Product Manager',
-    metrics=[('+34%', 'notional reduction / run'), ('18 banks', '12 currency pairs'), ('$X.XT', 'eligible notional')],
+    metrics=[M('cross-currency.reduction'), M('cross-currency.scale'), M('cross-currency.eligible')],
     ledger=('0→1 · Market structure', '+34%', 'reduction per run'),
     bay=dict(title='Cross-currency compression · central settlement', sub='Before: banks can only net in pairs · network offsets sit unused',
              big='+34%', big_sub='reduction per run vs bilateral',
@@ -119,7 +126,7 @@ SYSTEMS_A = [
     title='Dual-source valuation that caught discrepancies 48 hours earlier',
     lede='A late valuation mismatch can halt a multi-trillion compression cycle. An independent second source removed that single point of failure and moved failure upstream, while it was still cheap to fix.',
     org='Quantile · LSEG', stage='0→1 launch', year='2024', role='Product Manager',
-    metrics=[('−91%', 'resubmissions'), ('48h', 'earlier detection'), ('$XT+', 'cycle notional')],
+    metrics=[M('valuation.resubmissions'), M('valuation.detection'), M('valuation.cycle')],
     ledger=('Reliability · Infrastructure', '−91%', 'resubmissions'),
     bay=dict(title='Dual-source valuation · before live', sub='Diff · rows outside the band fail early, not in the live window',
              big='48h', big_sub='earlier detection · −91% resubmissions',
@@ -153,7 +160,7 @@ SYSTEMS_A = [
     title='FX compression with margin intelligence in the optimizer',
     lede='A mathematically good FX proposal still fails if margin or data disagree. Margin checks moved inside the optimizer, and four-source validation gated inputs before the live window.',
     org='Quantile · LSEG', stage='Production', year='2024', role='Product Manager',
-    metrics=[('40+', 'live runs'), ('100%', 'proposal acceptance'), ('−94%', 'live failures')],
+    metrics=[M('fx-compression.runs'), M('fx-compression.acceptance'), M('fx-compression.failures')],
     ledger=('FX · Production', '40+', 'live runs'),
     bay=dict(title='FX compression · forwards & NDFs', sub='Book ready · good math still fails if margin or data disagree',
              big='100%', big_sub='proposal acceptance · 40+ live runs',
@@ -187,7 +194,7 @@ SYSTEMS_A = [
     title='A reusable control plane for five enterprise agent systems',
     lede='One-off agent integrations do not scale. A shared control plane for context, typed actions, approval, and evals made the next agent a reuse problem, not a prototype from zero.',
     org='Quantile · LSEG', stage='Production', year='2025', role='Lead Product Manager',
-    metrics=[('5', 'enterprise systems'), ('MCP + APIs', 'reusable interfaces'), ('HITL + evals', 'production controls')],
+    metrics=[M('platform.systems'), ('MCP + APIs', 'reusable interfaces'), ('HITL + evals', 'production controls')],
     ledger=('Agent platform', '5', 'enterprise systems'),
     bay=dict(title='Agent Platform & Controls', sub='One plug path · five systems · scope expands when evals say so',
              big='5', big_sub='systems, one control model',

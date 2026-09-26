@@ -26,6 +26,7 @@ from data_systems_b import SYSTEMS_B  # noqa: E402
 import data_pages as P  # noqa: E402
 import stories  # noqa: E402
 import ideas  # noqa: E402
+import claims  # noqa: E402
 
 SYSTEMS = SYSTEMS_A + SYSTEMS_B
 BY = {s['slug']: s for s in SYSTEMS}
@@ -467,7 +468,7 @@ def person_ld():
         'description': 'Lead Product Manager building production AI agents and 0→1 financial infrastructure.',
         'knowsAbout': ['AI agents', 'LLM orchestration', 'Model Context Protocol', 'Agent evaluation', 'Human-in-the-loop controls',
                        'Derivatives compression', 'Portfolio optimization', 'Initial margin'],
-        'worksFor': {'@type': 'Organization', 'name': 'Quantile Technologies', 'url': 'https://www.quantile.com/',
+        'worksFor': {'@type': 'Organization', 'name': 'Quantile Technologies', 'url': 'https://www.lseg.com/en/post-trade',
                      'parentOrganization': {'@type': 'Organization', 'name': 'LSEG', 'url': 'https://www.lseg.com/'}},
         'alumniOf': {'@type': 'CollegeOrUniversity', 'name': 'Haverford College'},
         'sameAs': [P.SITE['linkedin'], P.SITE['substack'], LABS_URL],
@@ -807,6 +808,8 @@ def labs_page():
                             metrics=''.join(stat(v, k) for v, k in s['metrics']),
                             actions=btn('Read the case study', '/work/' + s['slug'], 'primary') + btn('Open ' + s['name'], s['live'], 'ghost'),
                             bay=system_bay(s, 'bay-' + s['slug'], 'compact')))
+    prov = ('<section class="sect sect--tight" aria-label="Where these figures come from">'
+            '<div class="wrap"><p class="hint hint--prov">%s</p></div></section>\n') % esc(L['provenance'])
     Sh = L['shared']
     # each card is watermarked with the product's own vocabulary
     words = dict(ridelens='Route Price Soonest Value Estimate Range Upfront', daylight='Schedule Resolve Explain Asked Accepted Confirmed',
@@ -823,7 +826,7 @@ def labs_page():
              '<span class="visit__copy"><span class="visit__k">%s</span><h2 class="visit__h" id="visit-h">%s</h2><span class="visit__p">%s</span></span>'
              '<span class="visit__go btn btn--mint"><span>%s</span>%s</span>%s</a><div class="rows__foot">%s</div></div></section>\n') % (
         esc(LABS_URL), esc(host(LABS_URL)), esc(C['h2']), esc(C['lede']), esc(C['link'][0]), EXTI, NEWTAB, hint(L['hint']))
-    body = head + ''.join(feats) + shared + visit
+    body = head + ''.join(feats) + prov + shared + visit
     title, desc = P.META['labs']
     return shell('labs', '/labs', title, desc, 'Labs', body, ld=list_ld('Labs builds', '/labs', LABS))
 
@@ -925,11 +928,15 @@ CASE_TPL = """<section class="casehead" id="top">
 <script type="application/json" id="brief">{{brief}}</script>
 """
 
-EMBED_TPL = """<figure class="embed" data-embed>
-<div class="embed__bar" aria-hidden="true"><span class="embed__dots"><i></i><i></i><i></i></span><span class="embed__url">{{host}}</span><span class="embed__live"><i></i>Live</span></div>
-<div class="embed__frame"><p class="embed__wait" data-embed-wait>Opening the live product.</p><iframe src="{{src}}" title="{{name}} live preview" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox"></iframe></div>
-<figcaption class="embed__cap">Live product preview · the working app, not a mock · scroll inside the frame to explore. If it stays blank, open the product in a new tab, because some browsers block embeds.</figcaption>
-</figure>"""
+EMBED_TPL = """<figure class="embed" data-embed data-embed-origin="{{origin}}">
+<div class="embed__bar" aria-hidden="true"><span class="embed__dots"><i></i><i></i><i></i></span><span class="embed__url">{{host}}</span><span class="embed__live" data-embed-live hidden><i></i>Live</span></div>
+<div class="embed__frame">
+<iframe src="{{src}}" title="{{name}} live preview" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox" data-embed-frame inert></iframe>
+<picture class="embed__still" data-embed-still>{{webp}}<img src="{{still}}" alt="{{alt}}" width="640" height="400" loading="lazy" decoding="async"></picture>
+</div>
+<figcaption class="embed__cap" data-embed-cap data-live-text="{{livecap}}">{{stillcap}}</figcaption>
+</figure>
+"""
 
 CLOSE_TPL = """<div class="closeout">
   <a class="nextcard" href="/work/{{nslug}}">
@@ -967,7 +974,7 @@ def beat_html(s, bt, j):
     elif k == 'live':
         inner = '<p class="beat__p">%s</p>' % esc(bt['body'])
         if s.get('embed'):
-            inner += render(EMBED_TPL, src=esc(s['live']), host=esc(s['name'] + ' · live product'), name=esc(s['name']))
+            inner += embed_figure(s)
         inner += '<p class="beat__cta">%s</p>' % btn('Open ' + s['name'], s['live'], 'primary')
     else:
         raise ValueError('unknown beat kind: ' + k)
@@ -976,6 +983,36 @@ def beat_html(s, bt, j):
     return ('<section class="beat beat--%s" id="%s" data-beat data-locus data-label="%s" aria-labelledby="%s-h">'
             '<header class="beat__head"><span class="beat__n" aria-hidden="true">%02d</span><h2 class="beat__h" id="%s-h">%s</h2></header>%s%s</section>\n') % (
         k, key, esc(bt['label']), key, j + 1, key, esc(bt['title']), inner, note)
+
+
+def embed_figure(s):
+    """A live preview that fails closed.
+
+    The still is what ships. The frame is behind it and only comes forward when
+    the product posts `embed:ready`, which a frame the browser blocked can never
+    do, because its scripts never run. Nothing else distinguishes the two cases
+    from this page: a blocked frame fires `load` exactly like a loaded one, and
+    everything else about it is opaque by design.
+
+    So the caption in the markup describes the still, and the script swaps it
+    for the live wording only after the handshake. Without JavaScript, and on a
+    day the product refuses to be framed, the page shows a picture and calls it
+    a picture."""
+    url = s['live']
+    still = thumb(s)
+    return render(
+        EMBED_TPL,
+        src=esc(url),
+        origin=esc(url.split('/')[0] + '//' + url.split('/')[2]),
+        host=esc(s['name'] + ' · live product'),
+        name=esc(s['name']),
+        still=still,
+        webp=wsource(still),
+        alt=esc('%s, as its case card shows it' % s['name']),
+        stillcap=esc('A still of %s. The live product opens in its own tab, and appears here '
+                     'instead of this picture when it allows this page to frame it.' % s['name']),
+        livecap=esc('Live product preview \u00b7 the working app, not a mock \u00b7 scroll inside the '
+                    'frame to explore.'))
 
 
 def brief_text(s):
@@ -1435,6 +1472,12 @@ def main():
             print('ERROR', p)
         sys.exit(1)
     print('built %d files, %d systems, checks clean' % (len(written), len(SYSTEMS)))
+    # A figure nobody can still vouch for is a warning, never an error: an old
+    # measurement is not a wrong one, and the build cannot tell the difference.
+    # tools/verify_claims.py is where the checkable ones are actually checked.
+    for c in claims.stale_claims():
+        print('note: %s asserted %d days ago, over the %d-day mark (%s = %s)'
+              % (c.id, c.age_days(), claims.STALE_AFTER_DAYS, c.id, c.value))
 
 
 if __name__ == '__main__':

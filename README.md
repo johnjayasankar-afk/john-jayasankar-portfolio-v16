@@ -59,6 +59,7 @@ Everything a visitor reads lives in four files:
 | `tools/data_pages.py` | home, labs, work, approach, about, writing, simple and 404 copy, including the home before and after rows; navigation, the Work menu groups and footer links; the domains strip, glossary and disclaimer; the domain |
 | `tools/stories.py` | each system's story: what its schematic interface shows at every phase |
 | `tools/ideas.py` | the writing covers and the Approach principle drawings, in the same language |
+| `tools/claims.py` | every verifiable figure on the site, declared once: value, source, how it is counted, the date it was last checked. `data_systems_*.py` and `data_pages.py` read from here and carry no figure of their own |
 
 Then regenerate:
 
@@ -92,11 +93,63 @@ assets/js/jj-data.js          generated palette index
 assets/fonts/                 Inter (variable), Newsreader italic (variable), IBM Plex Mono 400/500
 assets/img/                   portrait, employer and school logos, favicon, og.jpg, work/ thumbnails
 John_Jayasankar_Resume.pdf
-tools/                        generator, data, stories, ideas, dev server, CDP driver      (not deployed)
+tools/                        generator, data, stories, ideas, claims ledger, checkers,
+                              dev server, CDP driver                                     (not deployed)
 _stories.html _stories.js     story lab                                                     (not deployed)
 _thumbs.html _og.html         sources for the thumbnails and the link-preview card          (not deployed)
 research/                     source notes behind the case copy                             (not deployed)
 ```
+
+## Claims and checks
+
+Every figure on this site comes from `tools/claims.py`, the claims ledger.
+Nothing in the page data carries a number of its own: `data_systems_a.py`,
+`data_systems_b.py` and `data_pages.py` call `M()` and `V()` for every one.
+
+```
+python3 tools/claims.py                     # the ledger as a table
+python3 tools/claims.py --json              # the same, as JSON
+python3 tools/verify_claims.py              # re-derive what runs in a second
+python3 tools/verify_claims.py --build      # also the ones that need a test run
+```
+
+The verifier does three things and keeps them apart: it checks that every claim
+is printed somewhere and that nothing printed is undeclared; it re-derives each
+figure by running a command in its source repository and reports drift; and it
+names what it could not check rather than passing it.
+
+A claim has three honest states and the ledger never blurs them. Checked means a
+command re-derived it today. Unchecked means it is re-derivable but not here.
+Asserted means there is no machine source and a person vouched for it on a date.
+The employer figures are all asserted, because they were measured inside systems
+this repository cannot reach, and nothing pretends otherwise.
+
+The product repositories are resolved as siblings of this one, or under
+`CLAIMS_REPO_ROOT`. A missing repository is a failure to check, not a pass.
+
+`tools/verify_claims.py` is byte-identical to the Labs copy, and both ledgers
+declare the same `LEDGER_FORMAT`. One verifier serves both sites.
+
+`tools/build.py` prints a warning, and does not fail, for any asserted figure
+older than `STALE_AFTER_DAYS`. An old measurement is not a wrong one, and the
+build has no way to tell the difference.
+
+```
+python3 tools/check_external.py             # outbound links, short links, framing
+python3 tools/check_external.py --embeds    # can each embedded product be framed
+python3 tools/check_external.py --selftest  # the framing rule, no network
+```
+
+`check_external.py` needs the network, so it is run by hand rather than by the
+build. It is byte-identical to the Labs copy.
+
+The embed check covers two failures that look the same and are not. This site's
+own `frame-src` omitting an origin it embeds is a misconfiguration here, and
+fails the run. A product refusing to be framed is the product's decision, and is
+reported without failing anything, because the page handles it: a live preview
+ships as a still and only reveals the frame when the product posts
+`embed:ready`. A frame the browser blocked never sends that. See
+`docs/DOMAINS.md` for the handshake and what each product had to change.
 
 ## Stories and bays
 

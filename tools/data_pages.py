@@ -9,6 +9,11 @@ for RideLens, Daylight, RailDrop, and Gridiron.
 Fields named *_html are small trusted fragments authored here: links, <kbd> and
 <b> only. Everything else is plain text and is escaped by the generator."""
 
+import os  # noqa: E402
+
+from claims import V, checked_on  # noqa: E402
+
+
 SITE = dict(
     name='John Jayasankar',
     role='Lead Product Manager',
@@ -25,11 +30,68 @@ SITE = dict(
     tagline='I build AI agents for high-stakes financial workflows.',
 )
 
+# ---------------------------------------------------------------------------
+# Where the products live.
+#
+# Every product link on this site resolves through product_url(). Today that
+# returns the Vercel hostname each product was deployed under. When the eight
+# subdomains of johnjayasankar.com actually serve their products, set
+# PRODUCT_SUBDOMAINS=1 in the environment (or flip the default below) and every
+# link on the site moves at once.
+#
+# It is off by default because the subdomains do not serve yet. The wildcard
+# DNS record already points them at Vercel, but no Vercel project has claimed
+# them, so each one answers DEPLOYMENT_NOT_FOUND. Turning this on before that
+# is fixed would replace nine working links with nine 404s. docs/DOMAINS.md
+# records the measured state and the exact steps left.
+#
+# This block is duplicated verbatim in the Labs repository. The two sites have
+# to move together: one site linking a subdomain while the other links a Vercel
+# hostname is worse than either. Diff them before changing either.
+PRODUCT_DOMAIN = 'johnjayasankar.com'
+PRODUCT_SUBDOMAINS = os.environ.get('PRODUCT_SUBDOMAINS') == '1'
+
+# The hostname each product is deployed under today, and the subdomain it is
+# meant to answer on. The key is the subdomain label.
+PRODUCT_HOSTS = dict(
+    ridelens='https://ride-lens2.vercel.app/',
+    daylight='https://daylight-app-wine.vercel.app/',
+    raildrop='https://rail-drop3.vercel.app/',
+    gridiron='https://gridiron-pink-chi.vercel.app/',
+    agentfit='https://agent-fit2.vercel.app/',
+    cartonry='https://cartonry.vercel.app/',
+    keepfloor='https://keep-floor.vercel.app/',
+    pricing='https://pricing-hub-seven.vercel.app/',
+)
+
+
+# Where each product answers when it is running on this machine. Set
+# PRODUCT_LOCAL=1 to point every link and every live preview at these, which is
+# the only way to see a preview go live before the products are deployed: the
+# handshake that reveals the frame comes from the product itself. The products
+# allow a loopback framer in development for the same reason.
+PRODUCT_LOCAL = os.environ.get('PRODUCT_LOCAL') == '1'
+PRODUCT_LOCAL_PORTS = dict(
+    ridelens=3000,
+    raildrop=3001,
+    gridiron=5178,
+)
+
+
+def product_url(key):
+    """The public address of a product, as this site should link it."""
+    if PRODUCT_LOCAL and key in PRODUCT_LOCAL_PORTS:
+        return 'http://localhost:%d/' % PRODUCT_LOCAL_PORTS[key]
+    if PRODUCT_SUBDOMAINS:
+        return 'https://%s.%s/' % (key, PRODUCT_DOMAIN)
+    return PRODUCT_HOSTS[key]
+
+
 PRODUCTS = dict(
-    ridelens=('RideLens', 'https://ride-lens2.vercel.app/'),
-    daylight=('Daylight', 'https://daylight-app-wine.vercel.app/'),
-    raildrop=('RailDrop', 'https://rail-drop3.vercel.app/'),
-    gridiron=('Gridiron', 'https://gridiron-pink-chi.vercel.app/'),
+    ridelens=('RideLens', product_url('ridelens')),
+    daylight=('Daylight', product_url('daylight')),
+    raildrop=('RailDrop', product_url('raildrop')),
+    gridiron=('Gridiron', product_url('gridiron')),
 )
 
 NAV = [('Work', '/work', 'work'), ('Labs', '/labs', 'labs'), ('Approach', '/approach', 'approach'),
@@ -91,7 +153,7 @@ META = dict(
     home=('John Jayasankar · Lead Product Manager, Production AI Agents',
           'Lead Product Manager in New York building production AI agents and 0→1 financial infrastructure at Quantile (LSEG), plus independent products on Labs.'),
     work=('Work · John Jayasankar',
-          'Case studies by John Jayasankar: production AI agents and market infrastructure at Quantile (LSEG) and OpenGamma, plus four independent products.'),
+          'Case studies by John Jayasankar: production AI agents and market infrastructure at Quantile (LSEG) and OpenGamma, plus four of eight independent products.'),
     labs=('Independent products · John Jayasankar',
           'RideLens, Daylight, RailDrop, and Gridiron: independent products John Jayasankar designed, built, and shipped live end-to-end.'),
     approach=('Approach · John Jayasankar',
@@ -199,8 +261,9 @@ HOME = dict(
                    before='Late validation made good math fail in production', after='100% proposal acceptance across 40+ live runs')]),
     labs=dict(
         n='03', kicker='Labs',
-        h2=('Instruments I shipped.', 'Four independent products, built end-to-end.'),
-        lede='Consumer tools, a live football command center, and a native macOS app, each designed, built, and shipped live. No demos.',
+        h2=('Instruments I shipped.', 'Independent products, built end-to-end.'),
+        lede=('Consumer tools, a live football command center, and a native macOS app, each designed, built, and shipped live. No demos. '
+              'Four of the ' + V('labs.live') + ' have case studies here; the whole bench is on Labs.'),
         link=('Visit Labs', 'https://labs.johnjayasankar.com/'), more=('The Labs page', '/labs')),
     approach=dict(
         n='04', kicker='Approach',
@@ -221,12 +284,23 @@ HOME = dict(
 LABS = dict(
     kicker='Labs',
     h1=('Instruments I shipped.', 'Independent products, built end-to-end.'),
-    lede='Consumer tools, a live football command center, and a native macOS app, each designed, built, and shipped live. Separate from the day job. No demos.',
+    lede=('Consumer tools, a live football command center, and a native macOS app, each designed, built, and shipped live. Separate from the day job. No demos. '
+          'These four have case studies; all ' + V('labs.live') + ' are on Labs.'),
     order=['ridelens', 'daylight', 'raildrop', 'gridiron'],
     shared=dict(
         n=None, kicker='What they share',
-        h2=('Four products, one discipline.', 'Honest about what they know.'),
+        h2=('One discipline, four ways.', 'Honest about what they know.'),
         lede='Each draws a hard line between what it knows and what it would be tempting to guess.'),
+    # Counted, not asserted: the same move the products make about their own
+    # data sources, applied to the portfolio. The date comes from the ledger,
+    # so it cannot drift away from the last check.
+    provenance='Each figure here is counted from the product’s own repository, '
+               'or dated where it cannot be counted. Last checked '
+               + checked_on('ridelens.providers', 'ridelens.ranks', 'ridelens.ranges',
+                            'daylight.layers', 'daylight.certainty', 'daylight.tests',
+                            'raildrop.window', 'raildrop.email', 'raildrop.prices',
+                            'gridiron.sources', 'gridiron.guessed', 'gridiron.tests')
+               + '.',
     cta=dict(h2='Every build lives on Labs.',
              lede='The Labs site keeps the whole bench in one place, each product one click from live.',
              link=('Visit Labs', 'https://labs.johnjayasankar.com/')),
@@ -347,7 +421,7 @@ SIMPLE = dict(
               ('outcomes', 'Selected outcomes'), ('misc', 'Misc')],
     timeline=[
         dict(span='2025 to present', logo='quantile', alt='Quantile Technologies',
-             html=['I am Lead Product Manager for Portfolio Optimization at <a href="https://www.quantile.com/">Quantile Technologies</a> (an <a href="https://www.lseg.com/">LSEG</a> business). I ship production AI agents and a reusable human-supervised architecture across enterprise financial workflows. <a href="/work/setup-agent">A compression setup agent</a> collapsed a 3.5-hour expert setup bottleneck to 8 minutes and scaled run volume 3× at constant headcount. <a href="/work/incident-agent">An incident triage agent</a> returned 750+ senior engineering hours a year by diagnosing incidents before they escalated. <a href="/work/platform">The agent platform</a> made context, tools, actions, and evaluation reusable across five enterprise agent systems.']),
+             html=['I am Lead Product Manager for Portfolio Optimization at <a href="https://www.lseg.com/en/post-trade">Quantile Technologies</a> (an <a href="https://www.lseg.com/en">LSEG</a> business). I ship production AI agents and a reusable human-supervised architecture across enterprise financial workflows. <a href="/work/setup-agent">A compression setup agent</a> collapsed a 3.5-hour expert setup bottleneck to 8 minutes and scaled run volume 3× at constant headcount. <a href="/work/incident-agent">An incident triage agent</a> returned 750+ senior engineering hours a year by diagnosing incidents before they escalated. <a href="/work/platform">The agent platform</a> made context, tools, actions, and evaluation reusable across five enterprise agent systems.']),
         dict(span='2023 to 2025', logo='quantile', alt='Quantile Technologies',
              html=['I was Product Manager for Portfolio Optimization at Quantile. I owned discovery, strategy, launch, and GTM for optimization products used by global banks, and the work generated $XM+ in new and expansion ARR across rates, FX, and cross-currency. That meant 0→1 launches in multilateral compression, valuation/validation, and FX.',
                    'A few of the systems from this stretch: <a href="/work/cross-currency">Multilateral cross-currency compression</a> made $X.XT of previously ineligible bilateral notional available across 12 currency pairs. <a href="/work/valuation">Dual-source valuation</a> surfaced valuation discrepancies 48 hours earlier and cut failed-run resubmissions 91%. <a href="/work/fx-compression">FX forward and NDF compression</a> embedded margin intelligence in the optimizer and hit 100% proposal acceptance across 40+ live runs.']),
@@ -364,7 +438,7 @@ SIMPLE = dict(
         dict(span='2018 to 2022', logo='haverford', alt='Haverford College',
              html=['B.A. in Economics &amp; Linguistics at <a href="https://www.haverford.edu/">Haverford College</a>. GPA 3.9, cum laude, High Honors in Linguistics. I liked the combination: models of behavior on one side, precision about language and meaning on the other. That pairing still shows up in how I design agent boundaries.']),
     ],
-    bio_html='John Jayasankar is a Lead Product Manager in New York. He builds production AI agents and 0→1 financial infrastructure for complex, high-stakes workflows. At Quantile (LSEG) he has shipped agents and optimization products used by global banks. Previously he originated a pre-trade margin simulator at OpenGamma. Independently he built and shipped <a href="https://ride-lens2.vercel.app/">RideLens</a>, <a href="https://daylight-app-wine.vercel.app/">Daylight</a>, <a href="https://rail-drop3.vercel.app/">RailDrop</a>, and <a href="https://gridiron-pink-chi.vercel.app/">Gridiron</a>, collected on <a href="https://labs.johnjayasankar.com/">Labs</a>.',
+    bio_html='John Jayasankar is a Lead Product Manager in New York. He builds production AI agents and 0→1 financial infrastructure for complex, high-stakes workflows. At Quantile (LSEG) he has shipped agents and optimization products used by global banks. Previously he originated a pre-trade margin simulator at OpenGamma. Independently he built and shipped <a href="' + product_url('ridelens') + '">RideLens</a>, <a href="' + product_url('daylight') + '">Daylight</a>, <a href="' + product_url('raildrop') + '">RailDrop</a>, and <a href="' + product_url('gridiron') + '">Gridiron</a>, collected on <a href="https://labs.johnjayasankar.com/">Labs</a>.',
     systems=[('setup-agent', 'Setup Agent', '3.5h setup → 8 minutes'),
              ('incident-agent', 'Incident Agent', '750+ eng hours returned / year'),
              ('cross-currency', 'Cross-Currency', '34% more reduction per run'),
@@ -378,12 +452,14 @@ SIMPLE = dict(
              ('gridiron', 'Gridiron', 'Every game. Every drive. One view.')],
     build_html='Agents should earn autonomy. I start with the workflow, then give the system only the context, tools, and typed actions it needs, with a human gate on anything consequential. Model capability is one layer. Autonomy grows one rung at a time, on evidence. <a href="/approach">More on the control model</a>.',
     writing_html='Short theses for now. Longer notes land on <a href="https://substack.com/@johnjayasankar">Substack</a>.',
-    pets_intro_html='Four independent products with case writeups, all shipped live and collected on <a href="https://labs.johnjayasankar.com/">Labs</a>.',
+    pets_intro_html=('Four of the ' + V('labs.live') + ' independent products have case writeups here. '
+                     'All of them are shipped live and collected on '
+                     '<a href="https://labs.johnjayasankar.com/">Labs</a>.'),
     pets=[
-        dict(slug='ridelens', html='<a href="https://ride-lens2.vercel.app/">RideLens</a> is every ride, one comparison. Live roads. Real rate cards. Uber, Lyft, Empower, and Curb ranked before you book. I built it end-to-end because I was tired of opening four apps and guessing. <a href="/work/ridelens">RideLens case writeup</a>.'),
-        dict(slug='daylight', html='<a href="https://daylight-app-wine.vercel.app/">Daylight</a> is adaptive display lighting for macOS: warmth and brightness on a schedule you set, entirely offline, with a printed six-layer precedence ladder and three levels of certainty about whether a change actually took. <a href="/work/daylight">Daylight case writeup</a>.'),
-        dict(slug='raildrop', html='<a href="https://rail-drop3.vercel.app/">RailDrop</a> watches Amtrak listed fares across your travel window and emails only when a qualifying option improves. It fails honestly when the source is down and never invents fees, fares, or fake itineraries. <a href="/work/raildrop">RailDrop case writeup</a>.'),
-        dict(slug='gridiron', html='<a href="https://gridiron-pink-chi.vercel.app/">Gridiron</a> follows every live NFL and college football game on its own 3D field, with the reported ball spot, win probability, and odds from named sources. It draws only what a provider reported, and says so when something is missing. <a href="/work/gridiron">Gridiron case writeup</a>.'),
+        dict(slug='ridelens', html='<a href="' + product_url('ridelens') + '">RideLens</a> is every ride, one comparison. Live roads. Real rate cards. Uber, Lyft, Empower, and Curb ranked before you book. I built it end-to-end because I was tired of opening four apps and guessing. <a href="/work/ridelens">RideLens case writeup</a>.'),
+        dict(slug='daylight', html='<a href="' + product_url('daylight') + '">Daylight</a> is adaptive display lighting for macOS: warmth and brightness on a schedule you set, entirely offline, with a printed six-layer precedence ladder and three levels of certainty about whether a change actually took. <a href="/work/daylight">Daylight case writeup</a>.'),
+        dict(slug='raildrop', html='<a href="' + product_url('raildrop') + '">RailDrop</a> watches Amtrak listed fares across your travel window and emails only when a qualifying option improves. It fails honestly when the source is down and never invents fees, fares, or fake itineraries. <a href="/work/raildrop">RailDrop case writeup</a>.'),
+        dict(slug='gridiron', html='<a href="' + product_url('gridiron') + '">Gridiron</a> follows every live NFL and college football game on its own 3D field, with the reported ball spot, win probability, and odds from named sources. It draws only what a provider reported, and says so when something is missing. <a href="/work/gridiron">Gridiron case writeup</a>.'),
     ],
     outcomes=[('setup-agent', 'Quantile · 2025', 'Setup 3.5h → 8m · 3× run volume · 0 AI config errors / 6 mo'),
               ('incident-agent', 'Quantile · 2025', 'Investigation 4.5h → 11m · −78% escalations · domain MCP'),

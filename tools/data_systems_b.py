@@ -19,7 +19,15 @@ mock-up. How it was built is stated as it happened: John's brief, implemented
 with Claude Code.
 
 The `lab` block carries the Labs site's card copy: number, category, tagline,
-description, and what each product refuses to fake."""
+description, and what each product refuses to fake.
+Every figure in `metrics` comes from tools/claims.py, the ledger, through
+M(). No number is written here: tools/verify_claims.py re-derives what can be
+re-derived and reports the rest as unchecked rather than as passing.
+"""
+
+from claims import M, V  # noqa: E402
+from data_pages import product_url  # noqa: E402
+
 
 from data_systems_a import B
 
@@ -30,7 +38,7 @@ SYSTEMS_B = [
     title='Pre-trade simulator that made capital a decision, not a surprise',
     lede='A simulation engine that showed the next trade’s capital cost across venues before the desk committed. Comparing incremental with standalone cost made portfolio offsets visible.',
     org='OpenGamma · Trading Technologies', stage='0→1 launch', year='2022 to 2023', role='Product Analyst',
-    metrics=[('0→1', 'originated and shipped'), ('up to −30%', 'initial margin'), ('20+', 'enterprise clients')],
+    metrics=[M('margin-simulator.origination'), M('margin-simulator.reduction'), M('margin-simulator.clients')],
     ledger=('0→1 · Pre-trade', '0→1', 'originated and shipped'),
     bay=dict(title='Margin simulator · pre-trade simulation', sub='Portfolio margin known · the next trade’s capital impact is not',
              big='up to −30%', big_sub='initial margin · potential, not guaranteed',
@@ -68,7 +76,7 @@ SYSTEMS_B = [
     title='RideLens: every ride, one comparison',
     lede='Live roads. Real rate cards. Uber, Lyft, Empower, and Curb ranked before you open four apps and guess.',
     org='Independent · Labs', stage='0→1 · live product', year='2026', role='Product, design, and build',
-    metrics=[('4', 'providers, one board'), ('3', 'ways to rank a trip'), ('Honest', 'ranges stay ranges')],
+    metrics=[M('ridelens.providers'), M('ridelens.ranks'), M('ridelens.ranges')],
     ledger=('Labs · Consumer', '4', 'providers, one board'),
     lab=dict(n='01', cat='Consumer', tagline='Every ride, one comparison.',
              blurb='Live roads. Real rate cards. Uber, Lyft, Empower, and Curb ranked before you open four apps and guess.',
@@ -77,7 +85,7 @@ SYSTEMS_B = [
                    'Estimates move with traffic, time of day, hotspots, and weather'],
              rule='Ranges stay ranges.',
              rule_body='When a fare is a range, both ends stay on the board. RideLens never invents a midpoint to look decisive.'),
-    live='https://ride-lens2.vercel.app/', embed=True,
+    live=product_url('ridelens'), embed=True,
     bay=dict(title='RideLens · compare board', sub='Illustrative trip · four providers, three sort rules',
              big='4 → 1', big_sub='providers → one board',
              foot='Illustrative quote types, not live fares · the final fare is always confirmed in the provider app'),
@@ -115,7 +123,7 @@ SYSTEMS_B = [
       B('role', 'Role & tags', 'Role & tags', 'Product, design, and build. Designed the comparison model, quote honesty rules, ranking modes, and the live marketplace surface.',
         kind='role', tags='Multi-provider · Live routing · Quote honesty · Price · Soonest · Value'),
       B('impact', 'Impact', 'Impact', 'A working product: Photon search, OSRM routing, side-by-side provider cards, and auto-refresh after the first compare. Built end-to-end in Cursor and shipped live. I made it because I kept paying the tax of not knowing which ride was actually better tonight.'),
-      B('live', 'Live', 'Try the live product', 'Explore the working product below without leaving this case. The frame is the live app, not a mock; open it full-size for the full journey.', kind='live'),
+      B('live', 'Live', 'Try the live product', 'The product itself, below. If it does not allow this page to frame it, or you are reading with JavaScript off, the picture stays and says so.', kind='live'),
     ],
     also=['raildrop', 'daylight', 'setup-agent'],
   ),
@@ -125,7 +133,7 @@ SYSTEMS_B = [
     title='Daylight: your screen, through the day',
     lede='Adaptive display lighting for macOS. Warmth and brightness on a schedule you set: gradual, offline, and honest about what it is doing and why.',
     org='Independent · Labs', stage='Shipped · v1.0.0', year='2026', role='Product, design, and build',
-    metrics=[('6', 'layers, one fixed order'), ('3', 'levels of certainty'), ('263', 'tests, no dependencies')],
+    metrics=[M('daylight.layers'), M('daylight.certainty'), M('daylight.tests')],
     ledger=('Labs · Native macOS', '6', 'layers, one fixed order'),
     lab=dict(n='02', cat='Native', tagline='Your screen, through the day.',
              blurb='Warmth and brightness on a schedule you set: gradual, offline, and honest about what it is doing and why.',
@@ -134,7 +142,7 @@ SYSTEMS_B = [
                    'Read back after every write, and say so when another app took over'],
              rule='Success is not evidence.',
              rule_body='Daylight separates what it asked for, what macOS accepted, and what it could read back and confirm.'),
-    live='https://daylight-app-wine.vercel.app/', embed=False,
+    live=product_url('daylight'), embed=False,
     bay=dict(title='Daylight · display schedule', sub='Balanced preset · warmth and brightness decided separately',
              big='6 layers', big_sub='one fixed order',
              foot='Schematic · step values from the Balanced preset · the sentence is one the app writes'),
@@ -205,7 +213,7 @@ SYSTEMS_B = [
     title='RailDrop: know when your train gets cheaper',
     lede='Book the trip. Watch every bookable Amtrak option across your window. One email when a listed fare actually drops. Never an invented price.',
     org='Independent · Labs', stage='0→1 · live product', year='2026', role='Product, design, and build',
-    metrics=[('±1 day', 'default watch window'), ('1 email', 'only when it improves'), ('0', 'invented prices')],
+    metrics=[M('raildrop.window'), M('raildrop.email'), M('raildrop.prices')],
     ledger=('Labs · Consumer', '±1 day', 'default watch window'),
     lab=dict(n='03', cat='Consumer', tagline='Know when your train gets cheaper.',
              blurb='Book the trip. Watch every bookable Amtrak option across your window. One email when a listed fare actually drops.',
@@ -214,7 +222,7 @@ SYSTEMS_B = [
                    'One email when a listed fare beats what you paid'],
              rule='Never an invented price.',
              rule_body='If the live board is down, RailDrop says so. It never guesses a fare, a change fee, or an itinerary.'),
-    live='https://rail-drop3.vercel.app/', embed=True,
+    live=product_url('raildrop'), embed=True,
     bay=dict(title='RailDrop · Amtrak fare watch', sub='Sample board · BOS → NYP · you paid $128',
              big='$128 → $47', big_sub='paid → cheapest listed',
              foot='Sample board from RailDrop’s own site · listed fares · confirm on Amtrak'),
@@ -268,7 +276,7 @@ SYSTEMS_B = [
     title='Gridiron: every game, every drive, one view',
     lede='A live NFL and college football command center. Every game gets its own 3D field with the reported ball spot, beside the score, win probability, and odds from named sources.',
     org='Independent · Labs', stage='0→1 · live product', year='2026', role='Product, design, and build',
-    metrics=[('3', 'sources, each named'), ('0', 'guessed ball spots'), ('634', 'unit and integration tests')],
+    metrics=[M('gridiron.sources'), M('gridiron.guessed'), M('gridiron.tests')],
     ledger=('Labs · Live data', '3', 'sources, each named'),
     lab=dict(n='04', cat='Live data', tagline='Every game. Every drive. One view.',
              blurb='A live NFL and college football command center: a 3D field for every game, with the reported ball spot, win probability, and odds beside it.',
@@ -277,7 +285,7 @@ SYSTEMS_B = [
                    'Put ESPN win probability, DraftKings lines, and Kalshi prices beside the score'],
              rule='Reported, never guessed.',
              rule_body='Every spot, clock, and chance comes from a source that reported it. A missing ball spot says so; it is never guessed to midfield.'),
-    live='https://gridiron-pink-chi.vercel.app/', embed=False,
+    live=product_url('gridiron'), embed=True,
     bay=dict(title='Gridiron · football command center', sub='NFL Week 1 replay · ARI at LAC · captured real games',
              big='6 → 1', big_sub='live games → one view',
              foot='Captured real games from Gridiron’s NFL Week 1 replay · figures as ESPN, DraftKings, and Kalshi reported them · not betting advice'),
@@ -318,7 +326,7 @@ SYSTEMS_B = [
       B('craft', 'Craft', 'Built to be watched', [('One canvas', 'A single WebGL canvas draws every field, and renders only when something changes.'),
                                                   ('2D when it has to', 'Reduced effects, a 2D mode of SVG fields with no WebGL at all, and reduced motion respected.'),
                                                   ('Accessible', 'Every field has a text summary, and an axe audit of WCAG 2.1 A and AA runs in the end-to-end suite.'),
-                                                  ('Tested', '634 unit and integration tests and 147 end-to-end journeys across Chrome and WebKit at version 0.6.0, run against captured real games.')], kind='grid'),
+                                                  ('Tested', f"{V('gridiron.tests')} unit and integration tests and {V('gridiron.journeys')} end-to-end journeys in Chrome, 8 of them repeated in Firefox and WebKit, at version {V('gridiron.version')}, run against captured real games.")], kind='grid'),
       B('limits', 'Not claimed', 'What it does not claim', ['Not official real-time tracking: the provider has its own delay, and a clock shows what was last reported',
                                                             'College play-by-play is often incomplete; those games say Score-only coverage and carry no win probability',
                                                             'The sportsbook reports an opening line and a latest one and nothing between, so a past play shows opening and closing lines rather than letting a closing line read as the line at that moment',
@@ -333,7 +341,7 @@ SYSTEMS_B = [
       B('role', 'Role & tags', 'Role & tags', 'Product, design, and build. Wrote the brief, set the rule that nothing on screen is invented, and shipped the live product.',
         kind='role', tags='Live data · 3D fields · Reported spots only · Named sources'),
       B('impact', 'Impact', 'Impact', 'A live product: a 3D field for every game, Focus, the wall, and the Director, a game page with drive replay and game flow, ESPN win probability, DraftKings lines, and Kalshi prices, and team pages. The full server build adds the replay lab, watch parties, and push alerts, which the Vercel deployment leaves out. Shipped as a working product, not a pitch deck.'),
-      B('live', 'Live', 'See the product', 'Gridiron runs live on Vercel. When no game is on, it says so, with the next kickoffs and recent finals, and every game page, past or live, opens from there.', kind='live'),
+      B('live', 'Live', 'Try the live product', 'Gridiron runs live on Vercel, below. When no game is on it says so, with the next kickoffs and recent finals. The replay lab is in the full server build and not in this deployment, so what you see is whatever the provider is reporting now.', kind='live'),
     ],
     also=['ridelens', 'raildrop', 'daylight'],
   ),

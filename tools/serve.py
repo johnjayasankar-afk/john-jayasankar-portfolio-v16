@@ -94,8 +94,14 @@ class H(http.server.BaseHTTPRequestHandler):
                     if kv['key'].lower() in ('cache-control', 'strict-transport-security'):
                         continue
                     if kv['key'] == 'Content-Security-Policy':
-                        # localhost is plain http: upgrade-insecure-requests would break it
-                        self.send_header(kv['key'], kv['value'].replace('; upgrade-insecure-requests', ''))
+                        # localhost is plain http: upgrade-insecure-requests would break it.
+                        # frame-src also gains the loopback origins, so a live preview can be
+                        # driven against a product running on this machine. Dev only: tools/
+                        # is never deployed, and the deployed policy in vercel.json is
+                        # untouched.
+                        value = kv['value'].replace('; upgrade-insecure-requests', '')
+                        value = value.replace('frame-src ', 'frame-src http://localhost:* http://127.0.0.1:* ')
+                        self.send_header(kv['key'], value)
                     else:
                         self.send_header(kv['key'], kv['value'])
         self.end_headers()

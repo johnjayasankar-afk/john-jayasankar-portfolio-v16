@@ -60,7 +60,7 @@
         },
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://ride-lens2.vercel.app https://rail-drop3.vercel.app; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
+          "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src https://ride-lens2.vercel.app https://rail-drop3.vercel.app https://gridiron-pink-chi.vercel.app https://ridelens.johnjayasankar.com https://raildrop.johnjayasankar.com https://gridiron.johnjayasankar.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'; upgrade-insecure-requests"
         },
         {
           "key": "Permissions-Policy",

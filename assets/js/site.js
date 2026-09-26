@@ -1340,10 +1340,38 @@
     $$('[data-jump]').forEach(function (b) {
       b.addEventListener('click', function () { var t = doc.getElementById(b.getAttribute('data-jump')); if (t) goTo(t, true); });
     });
-    $$('[data-embed]').forEach(function (fig) {
-      var f = $('iframe', fig);
-      if (f) f.addEventListener('load', function () { fig.classList.add('is-loaded'); });
-    });
+    /*
+     * A live preview shows its still until the product says it rendered.
+     *
+     * The obvious version of this listened for the iframe's `load` event, which
+     * is wrong: a frame the browser refused to render on X-Frame-Options or
+     * frame-ancestors fires `load` too, and nothing else about it is readable
+     * from here. That version shipped, and one preview spent its life as a
+     * black rectangle under a caption promising a working app.
+     *
+     * `embed:ready` comes from the product itself, after its first paint, and
+     * the browser stamps the origin, so it cannot be forged by the page inside
+     * the frame or by anyone else. A blocked frame never sends it.
+     */
+    var embeds = $$('[data-embed]');
+    if (embeds.length) {
+      addEventListener('message', function (e) {
+        if (!e.data || e.data.type !== 'embed:ready') return;
+        embeds.forEach(function (fig) {
+          if (fig.getAttribute('data-embed-origin') !== e.origin) return;
+          if (fig.classList.contains('is-live')) return;
+          fig.classList.add('is-live');
+          var f = $('[data-embed-frame]', fig);
+          if (f) f.removeAttribute('inert');
+          var still = $('[data-embed-still]', fig);
+          if (still) still.setAttribute('aria-hidden', 'true');
+          var live = $('[data-embed-live]', fig);
+          if (live) live.removeAttribute('hidden');
+          var cap = $('[data-embed-cap]', fig);
+          if (cap && cap.getAttribute('data-live-text')) cap.textContent = cap.getAttribute('data-live-text');
+        });
+      });
+    }
   }
 
   /* ---- approach: the autonomy ladder ---------------------------------------- */

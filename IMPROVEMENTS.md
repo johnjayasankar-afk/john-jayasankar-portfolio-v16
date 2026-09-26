@@ -5,6 +5,315 @@ was actually verified, what is still open, and where the next cycle should look.
 
 ---
 
+## Cycle 22 - 2026-09-25 · Every figure gets a source, and one preview was showing nothing
+
+**Why this.** Cycle 21 closed with the admission that only Gridiron's figures had
+been checked against a repository, and that the other seven Labs products carried
+unverified numbers on both sites. This pass built the thing that checks them. On
+the way to it, the external check that came with it found a live product preview
+that had been rendering as an empty black box under a caption reading "the
+working app, not a mock", and a link on three pages pointing at a host that no
+longer answers.
+
+### Shipped
+
+1. **Every figure on the site is now declared once, with its source.**
+   - `tools/claims.py` is the ledger: 35 claims, each with its value, where it
+     came from, how it is counted, the date it was last checked, and whether a
+     machine can re-derive it. `data_systems_a.py`, `data_systems_b.py` and
+     `data_pages.py` read from it through `M()` and `V()` and carry no number of
+     their own, so a figure cannot change on the site without changing in the
+     ledger.
+   - A claim has three states and the ledger never blurs them. **Checked**: a
+     command re-derived it today. **Unchecked**: it is re-derivable, but not
+     here. **Asserted**: no machine source, a person vouched for it on a date.
+     All nineteen employer figures are asserted, because they were measured
+     inside systems this repository cannot reach, and the ledger says so every
+     time rather than letting them ride along with the checked ones.
+   - `tools/verify_claims.py` does three separate things: it checks that every
+     claim is printed and that nothing printed is undeclared; it re-derives each
+     figure by running a command in its source repository; and it names what it
+     could not check. It exits 1 on drift. It is byte-identical to the Labs copy,
+     and both ledgers declare the same `LEDGER_FORMAT`: one verifier, two sites.
+   - `tools/build.py` warns, and does not fail, on an asserted figure older than
+     180 days. An old measurement is not a wrong one and the build cannot tell
+     the difference.
+   - Validated by breaking it four ways: a ledger value the site does not print,
+     a page asking for a claim the ledger does not declare, a claim nothing
+     prints, and a date pushed back 400 days. Each fired, each named the right
+     claim, each exited 1.
+
+2. **Gridiron's figures had drifted again, and the way they were described was
+   wrong in a second way.** The runner reports **669** unit and integration
+   tests, against 634 on the site. Playwright lists **144** journeys for Chrome,
+   against 147. And "across Chrome and WebKit" left out Firefox, which also runs
+   eight of them. The site now reads "667 unit and integration tests and 144
+   end-to-end journeys in Chrome, 8 of them repeated in Firefox and WebKit, at
+   version 0.6.0". Found by the verifier, on its first real run.
+   - It then caught its author. Adding two tests to Gridiron later in this same
+     cycle left the site saying 667 while the runner said 669, and the next
+     `--build` run said so. That is the whole point of the thing, and it is
+     worth recording that it landed on the person who built it within the hour.
+
+3. **The RideLens live preview had been showing nothing on the live site, and
+   the fix went into the products.** `ride-lens2.vercel.app` answers
+   `X-Frame-Options: SAMEORIGIN` and a report-only CSP with
+   `frame-ancestors 'none'`. Confirmed on production, not locally: the frame is
+   944 by 599 pixels of black, and the caption underneath says "the working app,
+   not a mock".
+   - **A preview now fails closed.** It ships as a still, in the browser chrome
+     the embed already draws, with a caption that calls it a picture. The frame
+     sits behind it, `inert`, and comes forward only when the product posts
+     `embed:ready`. A frame the browser refused never sends that, because its
+     scripts never run, and nothing else distinguishes the two cases from the
+     parent: a blocked frame fires `load` exactly like a loaded one. The old
+     code listened for `load`, which is why this shipped. With JavaScript off,
+     the still is what there is, and the caption is still true.
+   - **All three products were fixed in their own repositories**, which is where
+     the brief said the fix belonged. Gridiron, RideLens and RailDrop now send
+     `frame-ancestors 'self' https://johnjayasankar.com
+     https://labs.johnjayasankar.com` and no `X-Frame-Options`. RideLens and
+     RailDrop ship their main policy report-only, and a report-only policy does
+     not override `X-Frame-Options`, so for those two the framing rule goes out
+     as its own enforced single-directive policy.
+   - **RailDrop's working preview was working by accident.** Its repository
+     already set `X-Frame-Options: SAMEORIGIN`; its deployment did not. The
+     preview survived only because the deploy was stale, and RailDrop's next
+     deploy would have taken it out silently. That is the failure the brief
+     predicted, already committed and waiting.
+   - **Gridiron's preview is new**, and its case study says what it is: the
+     Vercel build has no replay lab, so the frame shows whatever the provider is
+     reporting now, and when no game is on it says so.
+   - **Gridiron's own tests now hold the line.** Two new cases fail if
+     `frame-ancestors` goes back to `'none'` or an `X-Frame-Options` header
+     reappears, with a comment explaining what breaks and that it has happened
+     once already. Validated by removing the portfolio from the allowlist: four
+     tests failed, including the new one.
+
+4. **A dead link on three pages.** `www.quantile.com` resolves and then refuses
+   every connection, from curl and from a browser. It was linked from the home
+   page, About and Simple, and from the JSON-LD `worksFor`. Repointed to
+   `lseg.com/en/post-trade`, which is live. The LSEG link itself was going
+   through a 301 to `/en`; it now goes straight there.
+   - `tools/check_external.py --links` requests every outbound URL on the built
+     site and reports the status and any redirect. 43 URLs, all fine now.
+     `haverford.edu` answers 403 to anything without a browser fingerprint and
+     opens normally in a browser, so it is listed as bot-walled rather than
+     counted as a failure.
+
+5. **The site said four independent products where eight exist.** The Labs
+   section heading, its lede, the About page and the Work meta description all
+   implied four was the total. They now say four case studies out of eight
+   shipped, with the eight coming from the ledger so it cannot drift.
+
+6. **Every product link moves in one edit.** `product_url()` in
+   `tools/data_pages.py` returns the Vercel hostname today and the subdomain of
+   `johnjayasankar.com` when `PRODUCT_SUBDOMAINS` is set. Verified by building
+   with it on: all 38 product links move and no Vercel hostname is left behind.
+   It is off on purpose, see Still open.
+
+7. **`tools/audit.mjs`**, which opens every page at 1440, 1024, 768 and 390 and
+   checks one `h1`, no console error, no failed request, no horizontal overflow
+   and alt text on every image, then checks reduced motion, forced colours, the
+   print stylesheet and no-JS once per page. Validated by adding a second `h1`
+   and an image without alt to one page: it failed that page at all four widths
+   and passed the other nineteen.
+
+8. **Three documents.** `docs/DOMAINS.md`: where the products live, what is
+   already done, and the exact steps left. `docs/REPOS.md`: which repository
+   serves which live thing and what should be archived. `docs/PROPOSALS.md`:
+   where the Labs case studies should live, and the one figure this site is
+   missing.
+
+### Labs, in the same cycle
+
+The two sites are improved together and this log covers both. Labs got the same
+ledger and the same checkers, and one thing the portfolio does not have.
+
+9. **All eight builds now have their figures counted, not asserted.** Labs
+   carries 40 claims and 36 of them are re-derived by a command. Every figure
+   on every card was traced to the line of code it comes from:
+   - RideLens 4 providers (`SURFACEABLE_PROVIDERS`), 3 ways to rank (`type
+     RankingMode`); Daylight 6 layers (`enum ControlLayer`), 3 levels of
+     certainty (`enum ApplicationConfidence`), 263 tests and 0 dependencies;
+     RailDrop's window and its five `UNKNOWN` enumeration members; AgentFit 31
+     gates, 6 rungs and 15 reference workflows (`ARCHETYPES` less the neutral
+     `custom` entry); Cartonry 11 styles, 3 export emitters, 2 marked free;
+     KeepFloor 3 floors, 7 `FeeLine` entries, and zero network calls in the fee
+     and floor engine; Pricing Hub's 24 sheets and 0 macros, both counted from
+     inside the workbook zip rather than taken from a document.
+   - The header's "08 live · 04 featured" is counted from the build list itself,
+     so adding a ninth build without updating the header fails the check.
+   - Every count matched what the card already said. The one figure that had
+     drifted was Gridiron's, on both sites, and it is corrected in both.
+
+10. **Each build's rule now carries the mechanism that enforces it.** The rules
+    section is the best thing on the site and it was the only part making claims
+    nothing checked. Each of the eight is now a supporting claim in the ledger
+    with a derivation:
+    - Ranges stay ranges: `rankingMidpointMinor`, commented "Midpoint for
+      ranking only, never shown as the fare".
+    - Success is not evidence: `ReadbackJudgement.judge` returns
+      `.acceptedBySystem` when the system took the call, and `.readbackConfirmed`
+      only when a readback agrees within `confirmedWithin`.
+    - Never an invented price: five domain enumerations that each admit
+      `UNKNOWN`, so a missing fact is a status rather than a number.
+    - Reported, never guessed: `SPOT_UNAVAILABLE` in `shared/format.ts`, and no
+      branch that places the ball at midfield.
+    - Fit is not autonomy: the rung is `min(readinessCeiling, gateCap)`, and the
+      gate cap is computed independently of readiness.
+    - Not a picture: the DXF export emits cut, crease, guide, glue and dimension
+      layers as geometry a die maker can read.
+    - Every published fee, counted: `reconcileLines` checks the computed stack
+      against the platform's own statement.
+    - Plain formulas only: the workbook is an `.xlsx`, a format that cannot hold
+      a macro, so the rule is enforced by the file format rather than a promise.
+    - **All eight have one.** That was the finding this phase was most likely to
+      go badly, and it did not.
+
+11. **The featured and also-shipped split now says what it means.** The brief
+    expected three of the four also-shipped builds to have no schematic. They do:
+    all eight carry a worked example with named phases, built in an earlier
+    cycle. What the split actually marks is which four have a full case study on
+    the portfolio, and both section headings now say so in one line.
+
+12. **All eight short links verified live, end to end.** `/ridelens` through
+    `/pricing`, each returning 307 to the destination `vercel.json` declares.
+    `tools/check_external.py --hops` reads the redirects out of `vercel.json` and
+    follows each one against the live origin, so the config and the deployment
+    cannot silently disagree.
+    - **The 307s stay 307 for now, and become 301 when the subdomains land.** A
+      permanent redirect is cached long enough to be irreversible in practice,
+      and pointing one at a hostname Vercel generated would hard-wire an address
+      nobody controls into other people's browsers. Once the destination is
+      `gridiron.johnjayasankar.com`, the destination stops moving and the 307 is
+      buying nothing. Reasoning in `docs/DOMAINS.md`.
+
+13. **Labs stays one page.** Per-build pages on this domain were considered and
+    declined: the four featured builds already have full case studies on the
+    portfolio, so a Labs page for each would duplicate them or be a thinner
+    version, and for the other four a page would hold the same card at larger
+    type. The reasoning is in the Labs README, because it is a decision rather
+    than a proposal, and it is what lets the portfolio keep its four case
+    studies.
+
+14. **`docs/PROPOSALS.md`** argues the one question Labs should settle: whether
+    presenting eight products as equals flattens the large ones. The measurement
+    changed the question. Gridiron is 61,693 lines and RideLens is 50,719, so the
+    gap is two builds against six rather than one against seven, and KeepFloor at
+    10,221 lines with 31 test files is not the makeweight it looks like. The
+    recommendation is to keep the flat bench and add a fourth, quieter figure
+    that is comparable across all eight: how much of it there is, and how much is
+    tested, with Pricing Hub allowed to answer "a workbook, not a codebase"
+    rather than a number that would not mean the same thing.
+
+### Verified
+
+- **Both sites build clean** and `verify_claims.py` exits 0 on both. 59 distinct
+  claims across the two: 36 re-derived by a command, 4 that cannot be checked
+  here and are reported as unchecked every run, 19 asserted.
+- **All 23 pages of both sites, at four widths each**, plus reduced motion,
+  forced colours, print and no-JS: clean. The audit that says so was broken on
+  purpose first.
+- **The preview handshake was driven end to end against both stacks**, not
+  reasoned about. Gridiron on Vite and RideLens on Next.js, each running on this
+  machine, framed by the portfolio on this machine: both revealed the frame, hid
+  the still, showed the Live badge and swapped the caption. Both were also
+  watched failing: against the deployed products, which still refuse, the still
+  stays and the caption calls it a picture.
+- **One real bug came out of that test and would not have come out of any other
+  kind.** The handshake was first sent from a `requestAnimationFrame` callback.
+  A cross-origin frame the page has not revealed is occluded, Chrome defers its
+  animation frames until it is revealed, and the page was waiting for the message
+  before revealing it. It deadlocked, silently, and looked exactly like a blocked
+  frame. Sent on render instead.
+- **Labs: all 11 outbound links and all 8 short links**, live. No embeds on Labs,
+  so nothing to block.
+- **Transferred weight, measured before deciding anything, on both sites.** The
+  Labs landing page is 203 KB on the wire too, within a kilobyte of the
+  portfolio's, and for the same reasons. The portfolio's landing page is
+  203 KB: 26.3 KB document, 42.7 KB stylesheet, 27.0 KB script,
+  2.1 KB palette index, 63.2 KB of fonts, 32.7 KB image, 14.8 KB icons. The
+  brief's 485 KB is the uncompressed figure; Vercel serves brotli. CLS is 0.
+  TTFB 18 to 24 ms and DOMContentLoaded 137 ms from this machine, warm.
+  **203 KB is not a problem, so nothing was split, deferred or precompressed.**
+- **Precompression was measured rather than assumed.** Vercel's brotli returns
+  42,660 bytes for the stylesheet; its gzip returns 40,103; a plain local
+  `gzip -9` returns 38,399. The edge is compressing on the fly at a low quality
+  level, and it does not serve precompressed siblings from the repository, so
+  writing `.br` and `.gz` into `assets/` would add files nobody fetches. The
+  whole available win is about 10 KB of 203 KB.
+- **Both Gridiron deployments serve the same build**: identical bundle hash
+  `index-CmOCtivr.js`, identical `/api/health`, built 64 seconds apart.
+- **All eight product subdomains resolve** through a wildcard record and every
+  one answers `DEPLOYMENT_NOT_FOUND`.
+
+### Still open
+
+- **The Vercel work needs account access this pass did not have.** Eight
+  subdomains to claim, the duplicate `gridiron-ntsq` project to delete, and the
+  flip of `PRODUCT_SUBDOMAINS` on both sites together. Steps in
+  `docs/DOMAINS.md`. Turning the switch on before Vercel is ready would replace
+  every working product link with a 404.
+- **The three products need deploying before their previews go live.** The
+  header changes are in `gridiron`, `RideLens2` and `RailDrop3` and are not
+  pushed. Until then all three case studies show a still and say so, which is
+  the honest state and better than what was there. Once deployed the previews
+  come up on their own, without rebuilding either site, because the decision is
+  made in the browser by the handshake.
+- **Another session is working in `RideLens2` at the same time, and committed.**
+  Its commit at 18:33, "Let riders tell us what they actually paid (1.4)", swept
+  this cycle's `src/lib/embed.ts`, `next.config.ts` and `layout.tsx` changes in
+  alongside its own feature. The content is intact and typechecks, and the
+  branch is ten commits ahead of `origin/main` with nothing pushed, so nothing
+  has left the machine. Worth knowing before that branch is reviewed: two
+  unrelated pieces of work are in it.
+- **RailDrop3 has unrelated work in flight in its working tree**: a run-lease
+  feature, a worker route, a migration and a new integration test, dated 18:12
+  today. `tests/integration/dispatch-scale.test.ts` is load sensitive: it failed
+  twice while the whole suite ran in parallel, once with this cycle's changes
+  reverted, and passed four times in a row on its own. That is that work's to
+  settle, not this cycle's. Untouched.
+- **Four figures across the two sites cannot be re-derived here**, and the
+  verifier says so every run rather than passing them: Pricing Hub's 893 formula
+  checks and 46 bad-data probes need Excel 16.112 and AppleScript; Gridiron's
+  three named sources and RailDrop's one email are claims about behaviour rather
+  than counts.
+- **Nineteen employer figures are asserted** and always will be. They carry the
+  date they were last affirmed, 17 September 2026, and the build will say so
+  once that passes 180 days.
+- **Fifteen public repositories hold a version of this site**, twelve of them
+  with a single commit, and the name the live one should have is taken by a
+  different private repository. `docs/REPOS.md` has the sequence. Nothing was
+  renamed or archived in this pass, because the Vercel side could not be read
+  from here and an archived repository still deploys where a deleted one does
+  not.
+- **The local `Daylight` clone has no git remote.** A public repository of that
+  name exists, so the code is almost certainly pushed, but this clone cannot
+  push and the two were not confirmed to be the same.
+- Two repository names begin with a dash, `-cartonry2` and
+  `-john-jayasankar-portfolio-v6`, which breaks command-line tools that read the
+  name as a flag.
+- **`gridiron` has `node_modules` committed to it**, 12,792 files tracked at
+  HEAD. Its `.gitignore` lists `node_modules/`, which does nothing for files
+  already tracked. Found by staging this cycle's six-file change and watching
+  `git add -A` stage 12,845. One `git rm -r --cached node_modules` fixes it, and
+  it is a large enough commit to be the user's call. `RideLens2`, `RailDrop3`,
+  `labs` and this repository are clean.
+- **Labs still has no live previews, now as a decision rather than a
+  limitation.** The mechanism is built and shared, so it would be cheap. It is
+  declined because a launcher's job is the click, the card already carries a
+  worked example of the product running, and four cross-origin frames on the
+  page everyone lands on first is a different trade from one on a case study a
+  reader chose to open. Recorded with the measurement in Labs
+  `docs/PROPOSALS.md`.
+- **The fourth figure proposed for the Labs cards is not built.** It is one
+  derivation per product in the ledger and one slot in the card template, and it
+  is the one change that would let a scanner see that Gridiron is 61,693 lines
+  and Pricing Hub is a spreadsheet.
+
+---
+
 ## Cycle 21 - 2026-09-25 · Three cycles that never shipped, and the first paint
 
 **Why this.** John asked for another pass over both sites. The first thing the pass
