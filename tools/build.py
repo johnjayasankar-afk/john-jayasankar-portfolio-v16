@@ -292,7 +292,8 @@ HEAD = """<!doctype html>
 # Both faces render inside the first screen: the sans everywhere, the mono in the
 # badge, the section numbers and every label. Preloading the mono removes its swap.
 PRELOAD = ('<link rel="preload" href="/assets/fonts/inter-var.woff2" as="font" type="font/woff2" crossorigin>\n'
-           '<link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>\n')
+           '<link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-400.woff2" as="font" type="font/woff2" crossorigin>\n'
+           '<link rel="preload" href="/assets/fonts/ibm-plex-mono-latin-500.woff2" as="font" type="font/woff2" crossorigin>\n')
 
 CHROME = """<a class="skip" href="#main">Skip to content</a>
 <div class="progress" aria-hidden="true"><i data-scrollbar></i></div>
