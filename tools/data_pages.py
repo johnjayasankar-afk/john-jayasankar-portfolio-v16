@@ -162,6 +162,9 @@ META = dict(
            'John Jayasankar is a Lead Product Manager in New York at Quantile (LSEG), previously OpenGamma, building production AI agents and financial infrastructure.'),
     writing=('Writing · John Jayasankar',
              'Three short theses by John Jayasankar on AI product economics, agent autonomy, and why the hardest AI products are infrastructure products.'),
+    evidence=('Evidence · John Jayasankar',
+              'The claims ledger for johnjayasankar.com: every figure on the site with its source, its method, '
+              'and the date it was last confirmed.'),
     legal=('Disclaimer · John Jayasankar',
            'John Jayasankar’s personal site. The views are his own, and no company named here sponsors, endorses or is affiliated with it.'),
     simple=('John Jayasankar',

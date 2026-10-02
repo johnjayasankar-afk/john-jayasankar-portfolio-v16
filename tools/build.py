@@ -10,6 +10,7 @@ Content lives in data_*.py; this file only decides structure. It refuses to
 write a page with an em or en dash in it, and it checks that every internal
 link and in-page anchor it wrote actually resolves."""
 
+import datetime
 import hashlib
 import html
 import json
@@ -27,6 +28,7 @@ import data_pages as P  # noqa: E402
 import stories  # noqa: E402
 import ideas  # noqa: E402
 import claims  # noqa: E402
+import data_evidence as E  # noqa: E402
 
 SYSTEMS = SYSTEMS_A + SYSTEMS_B
 BY = {s['slug']: s for s in SYSTEMS}
@@ -55,6 +57,17 @@ STROKE = 'fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="r
 ARROW = icon('ico--arrow', '<path d="M3 8h9.5M8.5 4l4 4-4 4" %s/>' % STROKE)
 EXTI = icon('ico--ext', '<path d="M5 4.5h6.5V11M11.5 4.5l-7 7" %s/>' % STROKE)
 CHEV = icon('ico--chev', '<path d="M4.5 6.5 8 10l3.5-3.5" %s/>' % STROKE, 12)
+# The toggle shows the theme you would get by pressing it, not the one you are
+# in: a moon on a light page, a sun on a dark one. Both are in the markup and
+# CSS shows one, so the control never waits for script to become legible.
+SUN = icon('ico--sun', '<circle cx="8" cy="8" r="3.1" fill="none" stroke="currentColor" stroke-width="1.5"/>'
+           '<path d="M8 1.4v1.7M8 12.9v1.7M14.6 8h-1.7M3.1 8H1.4M12.67 3.33l-1.2 1.2M4.53 11.47l-1.2 1.2'
+           'M12.67 12.67l-1.2-1.2M4.53 4.53l-1.2-1.2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>')
+MOON = icon('ico--moon', '<path d="M13.4 9.6A5.8 5.8 0 0 1 6.4 2.6a5.9 5.9 0 1 0 7 7z" '
+            'fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>')
+THEME_BTN = ('<button class="kbtn kbtn--theme gl gl--flat" type="button" data-theme-toggle '
+             'aria-label="Switch theme">' + MOON + SUN + '</button>')
+
 SEARCH = icon('ico--search', '<circle cx="7" cy="7" r="4.4" fill="none" stroke="currentColor" stroke-width="1.5"/>'
                              '<path d="m10.4 10.4 3.1 3.1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>', 15)
 UP = icon('ico--up', '<path d="M8 13V3.5M4 7.5l4-4 4 4" %s/>' % STROKE)
@@ -264,7 +277,8 @@ HEAD = """<!doctype html>
 {{canonical}}
 <meta name="author" content="John Jayasankar">
 <meta name="robots" content="{{robots}}">
-<meta name="theme-color" content="{{theme}}">
+<meta name="theme-color" content="{{theme}}" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#080f0c" media="(prefers-color-scheme: dark)">
 <meta property="og:site_name" content="John Jayasankar">
 <meta property="og:locale" content="en_US">
 <meta property="og:type" content="{{ogtype}}">
@@ -285,6 +299,7 @@ HEAD = """<!doctype html>
 <link rel="apple-touch-icon" href="/assets/img/apple-touch-icon.png">
 <link rel="manifest" href="/site.webmanifest">
 <noscript><style>.hdr__bar { background: rgba(248, 246, 241, .94); }</style></noscript>
+<script src="/assets/js/theme.js?v={{vtheme}}"></script>
 {{preload}}<link rel="stylesheet" href="/assets/css/{{sheet}}?v={{v}}">
 {{ld}}</head>
 """
@@ -303,6 +318,7 @@ CHROME = """<a class="skip" href="#main">Skip to content</a>
     <nav class="hdr__nav" aria-label="Primary">{{nav}}<span class="nav__hl" aria-hidden="true"></span></nav>
     <div class="hdr__tools">
       <button class="kbtn" type="button" data-cmdk aria-label="Search and jump anywhere" aria-keyshortcuts="Meta+K Control+K">{{search}}<span class="kbtn__k"><span data-modkey>⌘</span>K</span></button>
+      {{theme_btn}}
       {{resume}}
       <a class="btn btn--primary btn--sm hdr__cta" href="mailto:{{email}}"><span>Email me</span></a>
       <button class="menu" type="button" aria-expanded="false" aria-controls="drawer" data-menu><span class="sr-only">Menu</span><i></i><i></i></button>
@@ -393,7 +409,7 @@ def chrome_top(page, section=None):
             nav.append('<a class="nav__link" href="%s"%s>%s</a>' % (href, cur, esc(label)))
     drawer = ''.join('<a class="drawer__link" href="%s"%s><span>%s</span>%s</a>'
                      % (href, ' aria-current="page"' if href == '/' + page else '', esc(label), ARROW) for label, href in P.SITE_LINKS)
-    return render(CHROME, nav=''.join(nav), drawer=drawer, search=SEARCH, email=EMAIL,
+    return render(CHROME, nav=''.join(nav), drawer=drawer, search=SEARCH, theme_btn=THEME_BTN, email=EMAIL,
                   resume=btn('Résumé', RESUME, 'ghost', 'sm').replace('class="btn btn--ghost btn--sm"', 'class="btn btn--ghost btn--sm hdr__resume"'),
                   dresume=btn('Résumé', RESUME, 'ghost'))
 
@@ -426,7 +442,7 @@ def shell(page, path, title, desc, label, body, og_type='website', robots='index
         render(HEAD, page=page, title=esc(title), desc=esc(desc), url=esc(DOM + path), robots=robots, theme='#f8f6f1',
                canonical='' if robots.startswith('noindex') else '<link rel="canonical" href="%s">' % esc(DOM + path),
                ogtype=og_type, ogimg=esc(DOM + img_v(og[0]) if og else og_img()), ogalt=esc(og[1] if og else P.SITE['og_alt']),
-               preload=PRELOAD, sheet='site.css', v=V['css'], ld=ld_block(ld)),
+               preload=PRELOAD, sheet='site.css', v=V['css'], vtheme=V['theme'], ld=ld_block(ld)),
         '<body data-label="%s">\n' % esc(label),
         chrome_top(page, section),
         '<main id="main" tabindex="-1">\n', body, '</main>\n',
@@ -1230,6 +1246,106 @@ def legal():
 
 
 # ----------------------------------------------------------------------------
+# evidence
+# ----------------------------------------------------------------------------
+# The ledger in claims.py is the only place a figure on this site is written
+# down. It used to ship only in tools/, which .vercelignore keeps out of the
+# deploy, so a reader could not see the method behind any number. This page is
+# that ledger in public. Every count below is counted from the ledger at build
+# time; nothing about the ledger is restated by hand.
+STATE_OF = {'here': 'checked', 'build': 'unchecked', 'elsewhere': 'unchecked', 'none': 'asserted'}
+
+
+def claim_anchor(cid):
+    """A claim id as an in-page anchor. 'setup-agent.time' -> 'c-setup-agent-time'."""
+    return 'c-' + cid.replace('.', '-')
+
+
+def vclass(v):
+    """How a claim's value wants to be set. Most are figures and take the
+    display size. A few are identifiers lifted out of the source, which is the
+    honest way to state a rule like "the ranking key is this constant": those
+    read as code, not as numbers, and at 34px they wrap into the next column.
+    One or two are long phrases that only need a size step down."""
+    s = str(v)
+    if re.search(r'[a-z][A-Z]|[_(]|\.[a-z]', s):
+        return ' evrow__v--code'
+    return ' evrow__v--long' if len(s) > 15 else ''
+
+def evrow(c, today):
+    """One claim, printed with everything the ledger knows about it."""
+    rows = [('Method', esc(c.method))]
+    if c.origin == 'repo':
+        where = 'the %s repository' % c.source if c.source else 'this repository'
+        rows.append(('Source', esc(where)))
+    elif c.origin == 'document':
+        where = '%s in %s' % (c.source, c.source_repo) if c.source_repo else c.source
+        rows.append(('Source', esc(where)))
+    rows.append(('Check', esc(E.CHECK_WORDS[c.check])))
+    backs = claims.BY_ID.get(c.supports)
+    if backs:
+        rows.append(('Backs', '<a href="#%s">%s, %s</a>' % (claim_anchor(backs.id), mval(backs.value), rate(backs.about))))
+    if c.note:
+        rows.append(('Note', esc(c.note)))
+    meta = ''.join('<div class="evrow__pair"><dt>%s</dt><dd>%s</dd></div>' % (k, v) for k, v in rows)
+    day = datetime.date.fromisoformat(c.verified)
+    stale = ' evrow--stale' if c.stale(today) else ''
+    flag = ('<span class="evrow__flag">Last affirmed over %d days ago</span>' % claims.STALE_AFTER_DAYS) if c.stale(today) else ''
+    return ('<li class="evrow%s" id="%s" data-reveal>'
+            '<div class="evrow__head"><p class="evrow__v%s"%s>%s</p><p class="evrow__a">%s</p>'
+            '<p class="evrow__when">Confirmed <time datetime="%s">%s</time>%s</p></div>'
+            '<dl class="evrow__meta">%s</dl></li>') % (
+        stale, claim_anchor(c.id), vclass(c.value), count_attr(c.value), mval(c.value), rate(c.about),
+        c.verified, esc(day.strftime('%-d %B %Y')), flag, meta)
+
+
+def evidence():
+    today = datetime.date.today()
+    by_state = {}
+    for c in claims.CLAIMS:
+        by_state.setdefault(STATE_OF[c.check], []).append(c)
+
+    # The total is a fact about the page; the three states are places on it.
+    # On a page this long the counts are the fastest way in, so each state
+    # tile is the link to its own section and the total is not pretending to
+    # be one.
+    band = [(str(len(claims.CLAIMS)), 'figures on the site', ''),
+            (str(len(by_state.get('checked', []))), 'a command re-derives', 'checked'),
+            (str(len(by_state.get('unchecked', []))), 'countable elsewhere', 'unchecked'),
+            (str(len(by_state.get('asserted', []))), 'asserted with a date', 'asserted')]
+    tiles = ''
+    for v, k, key in band:
+        if key and by_state.get(key):
+            tiles += ('<li class="stat evstat"><a class="evstat__a" href="#ev-%s-sec">'
+                      '<b class="stat__v"%s>%s</b><span class="stat__k">%s</span></a></li>') % (
+                key, count_attr(v), mval(v), rate(k))
+        else:
+            tiles += stat(v, k)
+    bandhtml = ('<section class="sect sect--tight" aria-label="%s"><div class="wrap">'
+                '<ul class="stats stats--row evband" data-reveal>%s</ul></div></section>\n') % (
+        esc(E.BAND_LABEL), tiles)
+
+    groups = ''
+    for g in E.GROUPS:
+        rows = by_state.get(g['key'], [])
+        if not rows:
+            continue
+        hid = 'ev-%s' % g['key']
+        head = shead(g['n'], '%s · %d' % (g['kicker'], len(rows)), g['h2'], hid, g['lede'])
+        groups += ('<section class="sect" id="%s-sec" aria-labelledby="%s"><div class="wrap">%s'
+                   '<ol class="evlist">%s</ol></div></section>\n') % (
+            hid, hid, head, ''.join(evrow(c, today) for c in rows))
+
+    note = '<section class="sect sect--flush" aria-labelledby="ev-note"><div class="wrap"><div class="panel evnote" data-reveal>' \
+           '<h2 class="evnote__h" id="ev-note">%s</h2>%s</div></div></section>\n' % (
+               esc(E.NOTE_H), ''.join('<p>%s</p>' % esc(x) for x in E.NOTE))
+
+    body = pagehead('Evidence', E.KICKER, E.H1, E.LEDE) + bandhtml + groups + note
+    title, desc = P.META['evidence']
+    return shell('evidence', '/evidence', title, desc, 'Evidence', body)
+
+
+# ----------------------------------------------------------------------------
 # simple
 # ----------------------------------------------------------------------------
 ICONS = dict(
@@ -1298,7 +1414,7 @@ def simple():
     head = render(HEAD, page='simple', title=esc(title), desc=esc(desc), url=esc(DOM + '/simple'), robots='index, follow',
                   canonical='<link rel="canonical" href="%s">' % esc(DOM + '/simple'),
                   theme='#ffffff', ogtype='profile', ogimg=esc(og_img()), ogalt=esc(P.SITE['og_alt']),
-                  preload=PRELOAD, sheet='simple.css', v=V['scss'], ld=ld_block(person_ld()))
+                  preload=PRELOAD, sheet='simple.css', v=V['scss'], vtheme=V['theme'], ld=ld_block(person_ld()))
     body = render(SIMPLE_TPL, dpic_webp=wsource_set([('/assets/img/portrait-sq-240.jpg', '240w'), ('/assets/img/portrait-sq-480.jpg', '480w')], '240px'),
                   nsec='%02d' % len(S['sections']), tagline=esc(S['tagline']), icons=icons, email=EMAIL,
                   timeline=''.join(timeline), bio=S['bio_html'], cards=cards, build=S['build_html'],
@@ -1345,7 +1461,7 @@ def data_js():
 
 
 def sitemap():
-    paths = ['/', '/work', '/labs', '/approach', '/writing', '/about', '/simple', '/legal'] + ['/work/' + s['slug'] for s in SYSTEMS]
+    paths = ['/', '/work', '/labs', '/approach', '/writing', '/about', '/evidence', '/simple', '/legal'] + ['/work/' + s['slug'] for s in SYSTEMS]
     urls = ''.join('  <url><loc>%s%s</loc><lastmod>%s</lastmod></url>\n' % (DOM, '' if p == '/' else p, LASTMOD) for p in paths)
     return ('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
             + urls.replace('<loc>%s</loc>' % DOM, '<loc>%s/</loc>' % DOM) + '</urlset>\n')
@@ -1447,7 +1563,7 @@ def resolves(href):
 def main():
     written = [write('assets/js/jj-data.js', data_js())]
     for key, rel in (('css', 'assets/css/site.css'), ('scss', 'assets/css/simple.css'), ('site', 'assets/js/site.js'),
-                     ('data', 'assets/js/jj-data.js')):
+                     ('data', 'assets/js/jj-data.js'), ('theme', 'assets/js/theme.js')):
         V[key] = fingerprint(rel)
     written.append(write('index.html', home()))
     written.append(write('labs.html', labs_page()))
@@ -1458,6 +1574,7 @@ def main():
     written.append(write('about.html', about()))
     written.append(write('writing.html', writing()))
     written.append(write('legal.html', legal()))
+    written.append(write('evidence.html', evidence()))
     written.append(write('simple.html', simple()))
     written.append(write('404.html', notfound()))
     written.append(write('sitemap.xml', sitemap()))
